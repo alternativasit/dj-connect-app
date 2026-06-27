@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { CalendarDays, Gift, GlassWater, HeartHandshake, Music2, Radio, Sparkles, UserRound } from "lucide-react";
 import { AppShell } from "@/components/event/app-shell";
 import { DJProfileCard } from "@/components/event/dj-profile-card";
@@ -24,7 +24,7 @@ export default async function EventHomePage({ params }: { params: { eventSlug: s
   ];
 
   return (
-    <AppShell eventSlug={bundle.event.slug} title={bundle.event.name} subtitle={bundle.venue?.name || bundle.dj.name}>
+    <AppShell eventSlug={bundle.event.slug} title={bundle.event.name} subtitle={bundle.venue?.name || bundle.dj.name} status={bundle.event.status}>
       <div className="space-y-5">
         <EventCard event={bundle.event} dj={bundle.dj} venue={bundle.venue} />
 
@@ -72,3 +72,4 @@ export default async function EventHomePage({ params }: { params: { eventSlug: s
     </AppShell>
   );
 }
+
