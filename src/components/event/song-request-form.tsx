@@ -26,10 +26,12 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
   const [form, setForm] = useState<FormState>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [statusMessage, setStatusMessage] = useState("");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrors({});
+    setStatusMessage("");
     const parsed = songRequestSchema.safeParse(form);
     if (!parsed.success) {
       const nextErrors: Record<string, string> = {};
@@ -42,27 +44,32 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
 
     setStatus("saving");
     const guestSessionId = getGuestSessionId();
-    const request: SongRequest = {
-      id: createClientId("song-request"),
+    const now = new Date().toISOString();
+    const payload = {
       event_id: eventId,
       dj_id: djId,
       guest_name: parsed.data.guest_name,
       song_title: parsed.data.song_title,
       artist: parsed.data.artist,
       note: parsed.data.note || null,
-      status: "Pending",
-      guest_session_id: guestSessionId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      status: "Pending" as const,
+      guest_session_id: guestSessionId
+    };
+
+    const fallbackRequest: SongRequest = {
+      id: createClientId("song-request"),
+      ...payload,
+      created_at: now,
+      updated_at: now
     };
 
     try {
       const supabase = getSupabaseBrowserClient();
-      let saved = request;
+      let saved = fallbackRequest;
       if (supabase) {
         const { data, error } = await supabase
           .from("song_requests")
-          .insert(request)
+          .insert(payload)
           .select("*")
           .single();
         if (error) throw error;
@@ -72,8 +79,10 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
       onCreated?.(saved);
       setForm(emptyForm);
       setStatus("success");
-    } catch {
+      setStatusMessage("Your request was sent to the DJ.");
+    } catch (error) {
       setStatus("error");
+      setStatusMessage(error instanceof Error ? error.message : "Could not send your request. Try again.");
     }
   }
 
@@ -136,8 +145,8 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
         <Send size={18} />
         {status === "saving" ? "Sending" : "Send Request"}
       </button>
-      {status === "success" ? <p className="text-center text-sm text-emerald-300">Your request was sent to the DJ.</p> : null}
-      {status === "error" ? <p className="text-center text-sm text-rose-300">Could not send your request. Try again.</p> : null}
+      {status === "success" ? <p className="text-center text-sm text-emerald-300">{statusMessage}</p> : null}
+      {status === "error" ? <p className="text-center text-sm text-rose-300">{statusMessage || "Could not send your request. Try again."}</p> : null}
     </form>
   );
 }
