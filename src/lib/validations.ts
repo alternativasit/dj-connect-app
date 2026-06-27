@@ -4,6 +4,7 @@ export const songRequestSchema = z.object({
   guest_name: z.string().min(2, "Guest name is required").max(80),
   song_title: z.string().min(1, "Song title is required").max(120),
   artist: z.string().min(1, "Artist is required").max(120),
+  music_url: z.string().url("Enter a valid music link").max(500).optional().or(z.literal("")),
   note: z.string().max(240).optional().or(z.literal(""))
 });
 

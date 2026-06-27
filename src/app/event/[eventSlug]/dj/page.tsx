@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, ExternalLink, HeartHandshake, Mail, MessageCircle } from "lucide-react";
 import { AppShell } from "@/components/event/app-shell";
+import { MusicPreviewCard } from "@/components/event/music-preview-card";
 import { DarkCard } from "@/components/ui/dark-card";
 import { getEventBundle } from "@/lib/data";
 import { formatCurrency, formatEventDate } from "@/lib/utils";
@@ -34,6 +35,15 @@ export default async function DJPage({ params }: { params: { eventSlug: string }
           </div>
         </DarkCard>
 
+        {bundle.dj.featured_video_url ? (
+          <DarkCard>
+            <h3 className="text-lg font-semibold text-white">Featured Video</h3>
+            <div className="mt-4">
+              <MusicPreviewCard url={bundle.dj.featured_video_url} title={bundle.dj.name + " featured video"} />
+            </div>
+          </DarkCard>
+        ) : null}
+
         <div className="grid gap-3 sm:grid-cols-2">
           <Link href={base + "/tip"} className="gradient-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3 font-semibold text-white"><HeartHandshake size={18} />Tip the DJ</Link>
           <a href={bundle.dj.booking_url || "mailto:" + bundle.dj.email} className="flex items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3 font-semibold text-white"><Mail size={18} />Book Now</a>
@@ -47,7 +57,7 @@ export default async function DJPage({ params }: { params: { eventSlug: string }
                 {link.label}<ExternalLink size={15} />
               </a>
             ))}
-            {bundle.dj.whatsapp ? <a href={"https://wa.me/" + bundle.dj.whatsapp.replace(/D/g, "")} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-2xl border border-line bg-night px-4 py-3 text-sm text-white">WhatsApp<MessageCircle size={15} /></a> : null}
+            {bundle.dj.whatsapp ? <a href={"https://wa.me/" + bundle.dj.whatsapp.replace(/\D/g, "")} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-2xl border border-line bg-night px-4 py-3 text-sm text-white">WhatsApp<MessageCircle size={15} /></a> : null}
           </div>
         </DarkCard>
 

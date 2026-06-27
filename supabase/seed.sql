@@ -3,7 +3,7 @@
 
 insert into public.djs (
   id, name, slug, photo_url, role, bio, city, country, genres,
-  instagram_url, tiktok_url, youtube_url, soundcloud_url, mixcloud_url,
+  instagram_url, tiktok_url, youtube_url, featured_video_url, soundcloud_url, mixcloud_url,
   whatsapp, email, booking_url, tip_paypal_url, tip_venmo_url, tip_cashapp_url,
   tip_stripe_url, tip_mercadopago_url, is_active
 ) values (
@@ -19,6 +19,7 @@ insert into public.djs (
   'https://instagram.com/alexbeatdj',
   'https://tiktok.com/@alexbeatdj',
   'https://youtube.com/@alexbeatdj',
+  'https://www.youtube.com/watch?v=FGBhQbmPwH8',
   'https://soundcloud.com/alexbeatdj',
   'https://mixcloud.com/alexbeatdj',
   '+525512345678',
@@ -48,11 +49,11 @@ values
   ('33333333-3333-4333-8333-333333333335', '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'Sunset Sessions', 'sunset-sessions-rooftop', 'Warm-up rooftop session with melodic house and pop edits.', '2026-08-23', '18:00', '23:30', 'Mexico City', 'Rooftop Lounge', 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1400&q=80', 'Draft', null, true)
 on conflict (id) do update set name = excluded.name, slug = excluded.slug, status = excluded.status, updated_at = now();
 
-insert into public.song_requests (id, event_id, dj_id, guest_name, song_title, artist, note, status, guest_session_id, created_at, updated_at)
+insert into public.song_requests (id, event_id, dj_id, guest_name, song_title, artist, note, music_url, music_provider, music_preview_image_url, music_preview_embed_url, status, guest_session_id, created_at, updated_at)
 values
-  ('44444444-4444-4444-8444-444444444441', '33333333-3333-4333-8333-333333333333', '11111111-1111-4111-8111-111111111111', 'Mia', 'One More Time', 'Daft Punk', 'For the rooftop crew', 'Pending', 'seed-session-1', '2026-06-26T19:10:00Z', '2026-06-26T19:10:00Z'),
-  ('44444444-4444-4444-8444-444444444442', '33333333-3333-4333-8333-333333333333', '11111111-1111-4111-8111-111111111111', 'Chris', 'Titanium', 'David Guetta ft. Sia', null, 'Approved', 'seed-session-2', '2026-06-26T19:16:00Z', '2026-06-26T19:18:00Z'),
-  ('44444444-4444-4444-8444-444444444443', '33333333-3333-4333-8333-333333333333', '11111111-1111-4111-8111-111111111111', 'Sam', 'Blinding Lights', 'The Weeknd', 'Birthday table', 'Played', 'seed-session-3', '2026-06-26T19:24:00Z', '2026-06-26T19:38:00Z')
+  ('44444444-4444-4444-8444-444444444441', '33333333-3333-4333-8333-333333333333', '11111111-1111-4111-8111-111111111111', 'Mia', 'One More Time', 'Daft Punk', 'For the rooftop crew', 'https://www.youtube.com/watch?v=FGBhQbmPwH8', 'YouTube', 'https://img.youtube.com/vi/FGBhQbmPwH8/hqdefault.jpg', 'https://www.youtube.com/embed/FGBhQbmPwH8?rel=0', 'Pending', 'seed-session-1', '2026-06-26T19:10:00Z', '2026-06-26T19:10:00Z'),
+  ('44444444-4444-4444-8444-444444444442', '33333333-3333-4333-8333-333333333333', '11111111-1111-4111-8111-111111111111', 'Chris', 'Titanium', 'David Guetta ft. Sia', null, 'https://open.spotify.com/track/0lHAMNU8RGiIObScrsRgmP', 'Spotify', null, 'https://open.spotify.com/embed/track/0lHAMNU8RGiIObScrsRgmP', 'Approved', 'seed-session-2', '2026-06-26T19:16:00Z', '2026-06-26T19:18:00Z'),
+  ('44444444-4444-4444-8444-444444444443', '33333333-3333-4333-8333-333333333333', '11111111-1111-4111-8111-111111111111', 'Sam', 'Blinding Lights', 'The Weeknd', 'Birthday table', 'https://music.apple.com/us/album/blinding-lights/1499378108?i=1499378617', 'Apple Music', null, 'https://embed.music.apple.com/us/album/blinding-lights/1499378108?i=1499378617', 'Played', 'seed-session-3', '2026-06-26T19:24:00Z', '2026-06-26T19:38:00Z')
 on conflict (id) do nothing;
 
 insert into public.polls (id, event_id, question, type, is_active, starts_at, ends_at)

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, ListMusic, Play, Trash2, X } from "lucide-react";
+import { Check, ExternalLink, ListMusic, Play, Trash2, X } from "lucide-react";
+import { MusicPreviewCard } from "@/components/event/music-preview-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { formatDateTime } from "@/lib/utils";
@@ -92,8 +93,14 @@ export function AdminRequestsBoard({ eventId, initialRequests }: { eventId: stri
                 <article key={request.id} className="rounded-[20px] border border-line bg-night p-3">
                   <h3 className="font-semibold text-white">{request.song_title}</h3>
                   <p className="text-sm text-muted">{request.artist}</p>
-                  <p className="mt-2 text-xs text-zinc-500">{request.guest_name} · {formatDateTime(request.created_at)}</p>
+                  <p className="mt-2 text-xs text-zinc-500">{request.guest_name} - {formatDateTime(request.created_at)}</p>
                   {request.note ? <p className="mt-2 text-xs text-zinc-400">{request.note}</p> : null}
+                  {request.music_url ? <div className="mt-3"><MusicPreviewCard url={request.music_url} title={request.song_title} artist={request.artist} compact /></div> : null}
+                  {request.music_url ? (
+                    <a href={request.music_url} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-line bg-surface2 px-3 py-2 text-xs font-semibold text-white">
+                      Open music link <ExternalLink size={13} />
+                    </a>
+                  ) : null}
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button onClick={() => setStatus(request, "Approved")} className="rounded-xl border border-line p-2 text-blue-200" aria-label="Approve"><Check size={15} /></button>
                     <button onClick={() => setStatus(request, "Played")} className="rounded-xl border border-line p-2 text-emerald-200" aria-label="Mark as Played"><Play size={15} /></button>

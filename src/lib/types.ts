@@ -28,6 +28,7 @@ export interface DJ {
   instagram_url: string | null;
   tiktok_url: string | null;
   youtube_url: string | null;
+  featured_video_url?: string | null;
   soundcloud_url: string | null;
   mixcloud_url: string | null;
   whatsapp: string | null;
@@ -89,6 +90,10 @@ export interface SongRequest {
   song_title: string;
   artist: string;
   note: string | null;
+  music_url?: string | null;
+  music_provider?: string | null;
+  music_preview_image_url?: string | null;
+  music_preview_embed_url?: string | null;
   status: SongRequestStatus;
   guest_session_id: string;
   created_at: string;

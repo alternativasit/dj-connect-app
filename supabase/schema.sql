@@ -27,6 +27,7 @@ create table if not exists public.djs (
   instagram_url text,
   tiktok_url text,
   youtube_url text,
+  featured_video_url text,
   soundcloud_url text,
   mixcloud_url text,
   whatsapp text,
@@ -88,6 +89,10 @@ create table if not exists public.song_requests (
   song_title text not null,
   artist text not null,
   note text,
+  music_url text,
+  music_provider text,
+  music_preview_image_url text,
+  music_preview_embed_url text,
   status text not null check (status in ('Pending', 'Approved', 'Played', 'Rejected')) default 'Pending',
   guest_session_id text not null,
   created_at timestamptz not null default now(),
@@ -346,6 +351,7 @@ create policy "dj venue admins insert events" on public.events for insert to aut
 create policy "dj venue admins update events" on public.events for update to authenticated using (public.can_manage_event(id)) with check (public.is_dj_owner(dj_id) or (venue_id is not null and public.is_venue_owner(venue_id)) or public.is_super_admin());
 create policy "dj venue admins delete events" on public.events for delete to authenticated using (public.can_manage_event(id));
 
+create policy "public read live song requests" on public.song_requests for select to anon, authenticated using (public.is_live_event(event_id));
 create policy "guests insert song requests" on public.song_requests for insert to anon, authenticated with check (status = 'Pending' and public.is_live_event(event_id));
 create policy "admins manage song requests" on public.song_requests for all to authenticated using (public.can_manage_event(event_id) or public.is_dj_owner(dj_id)) with check (public.can_manage_event(event_id) or public.is_dj_owner(dj_id));
 
@@ -394,7 +400,7 @@ group by p.id, p.event_id, o.id, o.label, o.display_order
 order by p.id, votes desc, o.display_order;
 
 grant usage on schema public to anon, authenticated;
-grant select on public.djs, public.venues, public.events, public.polls, public.poll_options, public.poll_votes, public.drinks, public.promos, public.dj_packages, public.gallery_items, public.poll_results to anon, authenticated;
+grant select on public.djs, public.venues, public.events, public.song_requests, public.polls, public.poll_options, public.poll_votes, public.drinks, public.promos, public.dj_packages, public.gallery_items, public.poll_results to anon, authenticated;
 grant insert on public.song_requests, public.poll_votes, public.tip_clicks, public.sponsor_clicks to anon, authenticated;
 grant all on public.profiles, public.djs, public.venues, public.events, public.song_requests, public.polls, public.poll_options, public.drinks, public.promos, public.dj_packages, public.gallery_items, public.tip_clicks, public.sponsor_clicks to authenticated;
 

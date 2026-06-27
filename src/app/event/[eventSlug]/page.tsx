@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { CalendarDays, Gift, GlassWater, HeartHandshake, Music2, Radio, Sparkles, UserRound } from "lucide-react";
+import { CalendarDays, Gift, GlassWater, HeartHandshake, ListMusic, Music2, Radio, Sparkles, UserRound } from "lucide-react";
 import { AppShell } from "@/components/event/app-shell";
 import { DJProfileCard } from "@/components/event/dj-profile-card";
 import { EventCard } from "@/components/event/event-card";
 import { FeatureCard } from "@/components/event/feature-card";
+import { MusicPreviewCard } from "@/components/event/music-preview-card";
 import { QRCard } from "@/components/event/qr-card";
 import { DarkCard } from "@/components/ui/dark-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { getEventBundle } from "@/lib/data";
 import { formatEventDate, getPublicEventUrl } from "@/lib/utils";
 
@@ -13,6 +15,7 @@ export default async function EventHomePage({ params }: { params: { eventSlug: s
   const bundle = await getEventBundle(params.eventSlug);
   const base = "/event/" + bundle.event.slug;
   const url = getPublicEventUrl(bundle.event);
+  const requestedSongs = bundle.songRequests.slice(0, 6);
   const features = [
     { title: "Request a Song", text: "Send Request and track My Requests.", href: base + "/request-song", icon: <Music2 size={22} /> },
     { title: "Live Polls", text: "Vote in genre and song polls in real time.", href: base + "/polls", icon: <Radio size={22} /> },
@@ -42,6 +45,32 @@ export default async function EventHomePage({ params }: { params: { eventSlug: s
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => <FeatureCard key={feature.title} {...feature} />)}
         </div>
+
+        <DarkCard>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-white"><ListMusic size={18} />Requested Songs</h3>
+              <p className="text-sm text-muted">Live requests from the dance floor.</p>
+            </div>
+            <Link href={base + "/request-song"} className="rounded-xl border border-line bg-night px-3 py-2 text-xs font-semibold text-white">Add song</Link>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {requestedSongs.length ? requestedSongs.map((request) => (
+              <article key={request.id} className="rounded-[20px] border border-line bg-night p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h4 className="truncate font-semibold text-white">{request.song_title}</h4>
+                    <p className="truncate text-sm text-muted">{request.artist}</p>
+                  </div>
+                  <StatusBadge status={request.status} />
+                </div>
+                {request.music_url ? <div className="mt-3"><MusicPreviewCard url={request.music_url} title={request.song_title} artist={request.artist} compact /></div> : null}
+              </article>
+            )) : (
+              <p className="rounded-[20px] border border-line bg-night px-4 py-5 text-center text-sm text-muted md:col-span-2">Requests will appear here during the event.</p>
+            )}
+          </div>
+        </DarkCard>
 
         <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
           <DJProfileCard dj={bundle.dj} href={base + "/dj"} />

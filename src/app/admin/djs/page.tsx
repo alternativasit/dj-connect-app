@@ -14,6 +14,7 @@ const fields: CrudField[] = [
   { name: "instagram_url", label: "Instagram", type: "url" },
   { name: "tiktok_url", label: "TikTok", type: "url" },
   { name: "youtube_url", label: "YouTube", type: "url" },
+  { name: "featured_video_url", label: "Featured video", type: "url" },
   { name: "soundcloud_url", label: "SoundCloud", type: "url" },
   { name: "mixcloud_url", label: "Mixcloud", type: "url" },
   { name: "whatsapp", label: "WhatsApp" },

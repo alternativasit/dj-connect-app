@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { Link as LinkIcon, Send } from "lucide-react";
+import { MusicPreviewCard } from "@/components/event/music-preview-card";
 import { songRequestSchema } from "@/lib/validations";
 import { getGuestSessionId, storeRequest } from "@/lib/guest-session";
 import type { SongRequest } from "@/lib/types";
@@ -10,6 +11,7 @@ type FormState = {
   guest_name: string;
   song_title: string;
   artist: string;
+  music_url: string;
   note: string;
 };
 
@@ -17,6 +19,7 @@ const emptyForm: FormState = {
   guest_name: "",
   song_title: "",
   artist: "",
+  music_url: "",
   note: ""
 };
 
@@ -47,6 +50,7 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
       guest_name: parsed.data.guest_name,
       song_title: parsed.data.song_title,
       artist: parsed.data.artist,
+      music_url: parsed.data.music_url || null,
       note: parsed.data.note || null,
       guest_session_id: getGuestSessionId()
     };
@@ -115,6 +119,18 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
           {errors.artist ? <p className="mt-1 text-xs text-rose-300">{errors.artist}</p> : null}
         </div>
       </div>
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-white" htmlFor="music_url"><LinkIcon size={15} />Music link</label>
+        <input
+          id="music_url"
+          value={form.music_url}
+          onChange={(event) => updateField("music_url", event.target.value)}
+          className="mt-2 w-full rounded-2xl border border-line bg-night px-4 py-3 text-white outline-none focus:border-violet"
+          placeholder="YouTube, YouTube Music, Spotify or Apple Music URL"
+        />
+        {errors.music_url ? <p className="mt-1 text-xs text-rose-300">{errors.music_url}</p> : null}
+      </div>
+      <MusicPreviewCard url={form.music_url} title={form.song_title} artist={form.artist} compact />
       <div>
         <label className="text-sm font-medium text-white" htmlFor="note">Optional note</label>
         <textarea
