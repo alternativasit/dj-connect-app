@@ -15,6 +15,10 @@ const apiSongRequestSchema = z.object({
 
 export const dynamic = "force-dynamic";
 
+export async function GET() {
+  return NextResponse.json({ ok: true, message: "Song requests API is ready" });
+}
+
 export async function POST(request: Request) {
   const parsed = apiSongRequestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
