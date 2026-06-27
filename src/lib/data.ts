@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from "@/lib/supabase/client";
 import type {
+  AdminData,
   DJ,
   DJPackage,
   DashboardMetrics,
@@ -30,6 +31,37 @@ import {
   seedTipClicks,
   seedVenues
 } from "@/lib/seed";
+
+function buildAdminData(input: Omit<AdminData, "metrics">): AdminData {
+  const metrics: DashboardMetrics = {
+    activeEvents: input.events.filter((item) => item.status === "Live" && item.is_active).length,
+    totalSongRequests: input.songRequests.length,
+    pendingRequests: input.songRequests.filter((item) => item.status === "Pending").length,
+    totalVotes: input.pollVotes.length,
+    activePromos: input.promos.filter((item) => item.is_active).length,
+    tipClicks: input.tipClicks.length,
+    upcomingEvents: input.events.filter((item) => item.status !== "Finished" && item.is_active).length
+  };
+
+  return { metrics, ...input };
+}
+
+function getSeedAdminData(): AdminData {
+  return buildAdminData({
+    djs: seedDjs,
+    venues: seedVenues,
+    events: seedEvents,
+    songRequests: seedSongRequests,
+    polls: seedPolls,
+    pollOptions: seedPollOptions,
+    pollVotes: seedPollVotes,
+    drinks: seedDrinks,
+    promos: seedPromos,
+    packages: seedPackages,
+    gallery: seedGallery,
+    tipClicks: seedTipClicks as TipClick[]
+  });
+}
 
 export async function getEventBundle(eventSlug: string): Promise<EventBundle> {
   const supabase = getSupabaseServerClient();
@@ -86,32 +118,45 @@ export async function getEventBundle(eventSlug: string): Promise<EventBundle> {
   }
 }
 
-export async function getAdminData() {
-  const metrics: DashboardMetrics = {
-    activeEvents: seedEvents.filter((item) => item.status === "Live").length,
-    totalSongRequests: seedSongRequests.length,
-    pendingRequests: seedSongRequests.filter((item) => item.status === "Pending").length,
-    totalVotes: seedPollVotes.length,
-    activePromos: seedPromos.filter((item) => item.is_active).length,
-    tipClicks: seedTipClicks.length,
-    upcomingEvents: seedEvents.filter((item) => item.status !== "Finished").length
-  };
+export async function getAdminData(): Promise<AdminData> {
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return getSeedAdminData();
 
-  return {
-    metrics,
-    djs: seedDjs,
-    venues: seedVenues,
-    events: seedEvents,
-    songRequests: seedSongRequests,
-    polls: seedPolls,
-    pollOptions: seedPollOptions,
-    pollVotes: seedPollVotes,
-    drinks: seedDrinks,
-    promos: seedPromos,
-    packages: seedPackages,
-    gallery: seedGallery,
-    tipClicks: seedTipClicks as TipClick[]
-  };
+  try {
+    const [djs, venues, events, songRequests, polls, pollOptions, pollVotes, drinks, promos, packagesResult, gallery, tipClicks] = await Promise.all([
+      supabase.from("djs").select("*").order("created_at", { ascending: false }),
+      supabase.from("venues").select("*").order("created_at", { ascending: false }),
+      supabase.from("events").select("*").order("event_date", { ascending: true }),
+      supabase.from("song_requests").select("*").order("created_at", { ascending: false }),
+      supabase.from("polls").select("*").order("created_at", { ascending: false }),
+      supabase.from("poll_options").select("*").order("display_order", { ascending: true }),
+      supabase.from("poll_votes").select("*").order("created_at", { ascending: false }),
+      supabase.from("drinks").select("*").order("display_order", { ascending: true }),
+      supabase.from("promos").select("*").order("display_order", { ascending: true }),
+      supabase.from("dj_packages").select("*").order("created_at", { ascending: false }),
+      supabase.from("gallery_items").select("*").order("display_order", { ascending: true }),
+      supabase.from("tip_clicks").select("*").order("created_at", { ascending: false })
+    ]);
+
+    if (events.error || songRequests.error) return getSeedAdminData();
+
+    return buildAdminData({
+      djs: (djs.data || []) as DJ[],
+      venues: (venues.data || []) as Venue[],
+      events: (events.data || []) as EventRecord[],
+      songRequests: (songRequests.data || []) as SongRequest[],
+      polls: (polls.data || []) as Poll[],
+      pollOptions: (pollOptions.data || []) as PollOption[],
+      pollVotes: (pollVotes.data || []) as PollVote[],
+      drinks: (drinks.data || []) as Drink[],
+      promos: (promos.data || []) as Promo[],
+      packages: (packagesResult.data || []) as DJPackage[],
+      gallery: (gallery.data || []) as GalleryItem[],
+      tipClicks: (tipClicks.data || []) as TipClick[]
+    });
+  } catch {
+    return getSeedAdminData();
+  }
 }
 
 export async function getEventById(eventId: string) {

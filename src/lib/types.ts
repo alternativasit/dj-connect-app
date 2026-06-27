@@ -218,3 +218,19 @@ export interface DashboardMetrics {
   tipClicks: number;
   upcomingEvents: number;
 }
+
+export interface AdminData {
+  metrics: DashboardMetrics;
+  djs: DJ[];
+  venues: Venue[];
+  events: EventRecord[];
+  songRequests: SongRequest[];
+  polls: Poll[];
+  pollOptions: PollOption[];
+  pollVotes: PollVote[];
+  drinks: Drink[];
+  promos: Promo[];
+  packages: DJPackage[];
+  gallery: GalleryItem[];
+  tipClicks: TipClick[];
+}
