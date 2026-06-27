@@ -2,22 +2,22 @@
 import { Radio } from "lucide-react";
 
 import { AdminReturnLink } from "@/components/event/admin-return-link";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { EventStatusLiveBadge } from "@/components/event/event-status-live-badge";
 import type { EventStatus } from "@/lib/types";
 
 export function Header({
   title = "DJ Connect",
   subtitle,
   eventSlug,
+  eventId,
   status = "Live"
 }: {
   title?: string;
   subtitle?: string;
   eventSlug?: string;
+  eventId?: string;
   status?: EventStatus;
 }) {
-  const badgeStatus = status === "Live" ? "LIVE" : status;
-
   return (
     <header className="sticky top-0 z-30 border-b border-line/70 bg-night/85 px-4 py-3 backdrop-blur-xl md:rounded-b-[24px]">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
@@ -28,7 +28,7 @@ export function Header({
         </Link>
         <div className="flex items-center gap-2">
           <AdminReturnLink />
-          <StatusBadge status={badgeStatus} />
+          <EventStatusLiveBadge eventId={eventId} initialStatus={status} />
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-line bg-surface2 text-violet">
             <Radio size={18} />
           </div>

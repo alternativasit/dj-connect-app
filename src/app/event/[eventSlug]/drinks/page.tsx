@@ -1,12 +1,15 @@
-import { AppShell } from "@/components/event/app-shell";
+﻿import { AppShell } from "@/components/event/app-shell";
 import { DrinksMenu } from "@/components/event/drinks-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getEventBundle } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function DrinksPage({ params }: { params: { eventSlug: string } }) {
   const bundle = await getEventBundle(params.eventSlug);
   return (
-    <AppShell eventSlug={bundle.event.slug} title="Drinks Menu" subtitle={bundle.venue?.name || bundle.event.name}>
+    <AppShell eventSlug={bundle.event.slug} eventId={bundle.event.id} title="Drinks Menu" subtitle={bundle.venue?.name || bundle.event.name} status={bundle.event.status}>
       <div className="space-y-5">
         <div>
           <h2 className="text-2xl font-bold text-white">Drinks Menu</h2>
@@ -17,3 +20,6 @@ export default async function DrinksPage({ params }: { params: { eventSlug: stri
     </AppShell>
   );
 }
+
+
+

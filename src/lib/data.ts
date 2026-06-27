@@ -1,4 +1,5 @@
-import { getSupabaseServerClient } from "@/lib/supabase/client";
+﻿import { getSupabaseServerClient } from "@/lib/supabase/client";
+import { getSupabaseServiceClient } from "@/lib/supabase/service";
 import type {
   AdminData,
   DJ,
@@ -64,7 +65,7 @@ function getSeedAdminData(): AdminData {
 }
 
 export async function getEventBundle(eventSlug: string): Promise<EventBundle> {
-  const supabase = getSupabaseServerClient();
+  const supabase = getSupabaseServiceClient() || getSupabaseServerClient();
   if (!supabase) return getSeedBundle(eventSlug);
 
   try {
@@ -119,7 +120,7 @@ export async function getEventBundle(eventSlug: string): Promise<EventBundle> {
 }
 
 export async function getAdminData(): Promise<AdminData> {
-  const supabase = getSupabaseServerClient();
+  const supabase = getSupabaseServiceClient() || getSupabaseServerClient();
   if (!supabase) return getSeedAdminData();
 
   try {
@@ -164,3 +165,4 @@ export async function getEventById(eventId: string) {
   const bundle = await getEventBundle(found.slug);
   return bundle;
 }
+

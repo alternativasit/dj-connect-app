@@ -1,4 +1,4 @@
-const CACHE_NAME = "dj-connect-v3";
+﻿const CACHE_NAME = "dj-connect-v6";
 const SAFE_ASSETS = ["/manifest.webmanifest", "/icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -14,16 +14,21 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
+});
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   const url = new URL(event.request.url);
   const isAppPage = event.request.mode === "navigate";
   const isNextAsset = url.pathname.startsWith("/_next/");
+  const isApi = url.pathname.startsWith("/api/");
   const isSupabase = url.hostname.endsWith(".supabase.co");
 
-  if (isAppPage || isNextAsset || isSupabase) {
-    event.respondWith(fetch(event.request));
+  if (isAppPage || isNextAsset || isApi || isSupabase) {
+    event.respondWith(fetch(event.request, { cache: "no-store" }));
     return;
   }
 

@@ -1,12 +1,19 @@
-import { AppShell } from "@/components/event/app-shell";
+﻿import { AppShell } from "@/components/event/app-shell";
 import { RequestSongView } from "@/components/event/request-song-view";
 import { getEventBundle } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function RequestSongPage({ params }: { params: { eventSlug: string } }) {
   const bundle = await getEventBundle(params.eventSlug);
   return (
-    <AppShell eventSlug={bundle.event.slug} title="Request a Song" subtitle={bundle.event.name}>
+    <AppShell eventSlug={bundle.event.slug} eventId={bundle.event.id} title="Request a Song" subtitle={bundle.event.name} status={bundle.event.status}>
       <RequestSongView eventId={bundle.event.id} djId={bundle.dj.id} />
     </AppShell>
   );
 }
+
+
+
+

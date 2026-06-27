@@ -1,12 +1,15 @@
-import { AppShell } from "@/components/event/app-shell";
+﻿import { AppShell } from "@/components/event/app-shell";
 import { PollCard } from "@/components/event/poll-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getEventBundle } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function PollsPage({ params }: { params: { eventSlug: string } }) {
   const bundle = await getEventBundle(params.eventSlug);
   return (
-    <AppShell eventSlug={bundle.event.slug} title="Live Polls" subtitle={bundle.event.name}>
+    <AppShell eventSlug={bundle.event.slug} eventId={bundle.event.id} title="Live Polls" subtitle={bundle.event.name} status={bundle.event.status}>
       <div className="space-y-5">
         <div>
           <h2 className="text-2xl font-bold text-white">Live Polls</h2>
@@ -24,3 +27,6 @@ export default async function PollsPage({ params }: { params: { eventSlug: strin
     </AppShell>
   );
 }
+
+
+

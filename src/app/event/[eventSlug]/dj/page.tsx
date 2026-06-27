@@ -1,10 +1,13 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { CalendarDays, ExternalLink, HeartHandshake, Mail, MessageCircle } from "lucide-react";
 import { AppShell } from "@/components/event/app-shell";
 import { MusicPreviewCard } from "@/components/event/music-preview-card";
 import { DarkCard } from "@/components/ui/dark-card";
 import { getEventBundle } from "@/lib/data";
 import { formatCurrency, formatEventDate } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function DJPage({ params }: { params: { eventSlug: string } }) {
   const bundle = await getEventBundle(params.eventSlug);
@@ -18,7 +21,7 @@ export default async function DJPage({ params }: { params: { eventSlug: string }
   ].filter((item) => item.url);
 
   return (
-    <AppShell eventSlug={bundle.event.slug} title="DJ Profile" subtitle={bundle.dj.name}>
+    <AppShell eventSlug={bundle.event.slug} eventId={bundle.event.id} title="DJ Profile" subtitle={bundle.dj.name} status={bundle.event.status}>
       <div className="space-y-5">
         <DarkCard className="overflow-hidden p-0">
           <div className="h-56 bg-surface2">
@@ -105,3 +108,6 @@ export default async function DJPage({ params }: { params: { eventSlug: string }
     </AppShell>
   );
 }
+
+
+

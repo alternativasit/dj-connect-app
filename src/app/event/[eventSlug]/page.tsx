@@ -10,6 +10,9 @@ import { DarkCard } from "@/components/ui/dark-card";
 import { getEventBundle } from "@/lib/data";
 import { formatEventDate, getPublicEventUrl } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function EventHomePage({ params }: { params: { eventSlug: string } }) {
   const bundle = await getEventBundle(params.eventSlug);
   const base = "/event/" + bundle.event.slug;
@@ -24,7 +27,7 @@ export default async function EventHomePage({ params }: { params: { eventSlug: s
   ];
 
   return (
-    <AppShell eventSlug={bundle.event.slug} title={bundle.event.name} subtitle={bundle.venue?.name || bundle.dj.name} status={bundle.event.status}>
+    <AppShell eventSlug={bundle.event.slug} eventId={bundle.event.id} title={bundle.event.name} subtitle={bundle.venue?.name || bundle.dj.name} status={bundle.event.status}>
       <div className="space-y-5">
         <EventCard event={bundle.event} dj={bundle.dj} venue={bundle.venue} />
 
@@ -72,4 +75,8 @@ export default async function EventHomePage({ params }: { params: { eventSlug: s
     </AppShell>
   );
 }
+
+
+
+
 
