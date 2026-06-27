@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ListMusic, Music2, PlayCircle } from "lucide-react";
+import { ListMusic, Music2, PlayCircle, X } from "lucide-react";
 
+import { MusicPreviewCard } from "@/components/event/music-preview-card";
 import { DarkCard } from "@/components/ui/dark-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getMusicPreview } from "@/lib/music-preview";
@@ -15,59 +16,64 @@ function sortRequests(items: SongRequest[]) {
 }
 
 function RequestedSongRow({ request }: { request: SongRequest }) {
+  const [isPlaying, setIsPlaying] = useState(false);
   const preview = getMusicPreview(request.music_url, request.song_title + " - " + request.artist);
 
   return (
-    <article className="grid min-h-[5.5rem] grid-cols-[5rem_1fr] gap-3 rounded-[20px] border border-line bg-night p-3">
-      {preview ? (
-        <a
-          href={preview.externalUrl}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={"Play " + request.song_title}
-          className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-line bg-black/60 text-violet transition hover:border-violet/70"
+    <article className="rounded-[20px] border border-line bg-night p-3">
+      <div className="grid min-h-[5.5rem] grid-cols-[5rem_1fr] gap-3">
+        <button
+          type="button"
+          onClick={() => preview ? setIsPlaying((current) => !current) : undefined}
+          disabled={!preview}
+          aria-label={preview ? "Play " + request.song_title : "No music link available"}
+          className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-line bg-black/60 text-violet transition enabled:hover:border-violet/70 disabled:opacity-80"
         >
-          {preview.imageUrl ? <img src={preview.imageUrl} alt={preview.title} className="h-full w-full object-cover" /> : <Music2 size={24} />}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-            <PlayCircle className="drop-shadow" size={26} />
-          </div>
-        </a>
-      ) : (
-        <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-line bg-black/60 text-violet">
-          <Music2 size={24} />
-        </div>
-      )}
-
-      <div className="min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h4 className="truncate font-semibold text-white">{request.song_title}</h4>
-            <p className="truncate text-sm text-muted">{request.artist}</p>
-          </div>
-          <StatusBadge status={request.status} className="shrink-0" />
-        </div>
-
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <span className="min-w-0 truncate rounded-full border border-line bg-surface2 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-violet">
-            {preview?.provider || "Song request"}
-          </span>
+          {preview?.imageUrl ? <img src={preview.imageUrl} alt={preview.title} className="h-full w-full object-cover" /> : <Music2 size={24} />}
           {preview ? (
-            <a
-              href={preview.externalUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-violet/50 bg-violet/15 px-3 py-2 text-xs font-semibold text-white transition hover:border-violet hover:bg-violet/25"
-            >
-              <PlayCircle size={14} />
-              Play Song
-            </a>
-          ) : (
-            <span className="inline-flex shrink-0 items-center rounded-xl border border-line bg-surface2 px-3 py-2 text-xs font-semibold text-muted">
-              No link
+            <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+              <PlayCircle className="drop-shadow" size={26} />
+            </div>
+          ) : null}
+        </button>
+
+        <div className="min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h4 className="truncate font-semibold text-white">{request.song_title}</h4>
+              <p className="truncate text-sm text-muted">{request.artist}</p>
+            </div>
+            <StatusBadge status={request.status} className="shrink-0" />
+          </div>
+
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <span className="min-w-0 truncate rounded-full border border-line bg-surface2 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-violet">
+              {preview?.provider || "Song request"}
             </span>
-          )}
+            {preview ? (
+              <button
+                type="button"
+                onClick={() => setIsPlaying((current) => !current)}
+                className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-violet/50 bg-violet/15 px-3 py-2 text-xs font-semibold text-white transition hover:border-violet hover:bg-violet/25"
+              >
+                {isPlaying ? <X size={14} /> : <PlayCircle size={14} />}
+                {isPlaying ? "Close Player" : "Play Song"}
+              </button>
+            ) : (
+              <span className="inline-flex shrink-0 items-center rounded-xl border border-line bg-surface2 px-3 py-2 text-xs font-semibold text-muted">
+                No link
+              </span>
+            )}
+          </div>
         </div>
       </div>
+
+      {preview && isPlaying ? (
+        <div className="mt-3 overflow-hidden rounded-[20px] border border-violet/30 bg-black/40 p-2">
+          <MusicPreviewCard url={preview.externalUrl} title={request.song_title} artist={request.artist} compact />
+          <p className="mt-2 text-center text-xs text-muted">Tap play in the embedded player to listen here.</p>
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -135,4 +141,3 @@ export function RequestedSongsFeed({ eventId, requestHref, initialRequests }: { 
     </DarkCard>
   );
 }
-
