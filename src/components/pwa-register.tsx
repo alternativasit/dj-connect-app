@@ -4,9 +4,11 @@ import { useEffect } from "react";
 
 export function PWARegister() {
   useEffect(() => {
-    if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
-      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
-    }
+    if (!("serviceWorker" in navigator) || !window.location.protocol.startsWith("http")) return;
+
+    navigator.serviceWorker.register("/sw.js").then((registration) => {
+      registration.update().catch(() => undefined);
+    }).catch(() => undefined);
   }, []);
 
   return null;

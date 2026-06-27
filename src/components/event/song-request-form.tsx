@@ -82,7 +82,8 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
       setStatusMessage("Your request was sent to the DJ.");
     } catch (error) {
       setStatus("error");
-      setStatusMessage(error instanceof Error ? error.message : "Could not send your request. Try again.");
+      const errorMessage = error instanceof Error ? error.message : (typeof error === "object" && error && "message" in error ? String(error.message) : "Could not send your request. Try again.");
+      setStatusMessage(errorMessage);
     }
   }
 
