@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
 import { songRequestSchema } from "@/lib/validations";
-import { createClientId } from "@/lib/utils";
 import { getGuestSessionId, storeRequest } from "@/lib/guest-session";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { SongRequest } from "@/lib/types";
 
 type FormState = {
@@ -43,8 +41,6 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
     }
 
     setStatus("saving");
-    const guestSessionId = getGuestSessionId();
-    const now = new Date().toISOString();
     const payload = {
       event_id: eventId,
       dj_id: djId,
@@ -52,29 +48,21 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
       song_title: parsed.data.song_title,
       artist: parsed.data.artist,
       note: parsed.data.note || null,
-      status: "Pending" as const,
-      guest_session_id: guestSessionId
-    };
-
-    const fallbackRequest: SongRequest = {
-      id: createClientId("song-request"),
-      ...payload,
-      created_at: now,
-      updated_at: now
+      guest_session_id: getGuestSessionId()
     };
 
     try {
-      const supabase = getSupabaseBrowserClient();
-      let saved = fallbackRequest;
-      if (supabase) {
-        const { data, error } = await supabase
-          .from("song_requests")
-          .insert(payload)
-          .select("*")
-          .single();
-        if (error) throw error;
-        saved = data as SongRequest;
+      const response = await fetch("/api/song-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "Could not send your request. Try again.");
       }
+
+      const saved = result.songRequest as SongRequest;
       storeRequest(saved);
       onCreated?.(saved);
       setForm(emptyForm);
@@ -82,8 +70,7 @@ export function SongRequestForm({ eventId, djId, onCreated }: { eventId: string;
       setStatusMessage("Your request was sent to the DJ.");
     } catch (error) {
       setStatus("error");
-      const errorMessage = error instanceof Error ? error.message : (typeof error === "object" && error && "message" in error ? String(error.message) : "Could not send your request. Try again.");
-      setStatusMessage(errorMessage);
+      setStatusMessage(error instanceof Error ? error.message : "Could not send your request. Try again.");
     }
   }
 
