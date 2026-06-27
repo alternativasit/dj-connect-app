@@ -12,6 +12,14 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Password must have at least 6 characters")
 });
 
+export const resetPasswordSchema = z.object({
+  password: z.string().min(8, "Password must have at least 8 characters"),
+  confirmPassword: z.string().min(8, "Confirm your new password")
+}).refine((value) => value.password === value.confirmPassword, {
+  message: "Passwords must match",
+  path: ["confirmPassword"]
+});
+
 export const pollCreateSchema = z.object({
   question: z.string().min(4, "Question is required"),
   type: z.enum(["genre", "song", "custom"]),

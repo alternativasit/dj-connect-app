@@ -13,6 +13,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,13 +31,48 @@ export function LoginForm() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
-    setLoading(false);
-    if (error) {
-      setMessage(error.message);
+    try {
+      const { error } = await supabase.auth.signInWithPassword(parsed.data);
+      if (error) {
+        setMessage(error.message);
+        return;
+      }
+    } catch {
+      setMessage("Could not reach Supabase. Check the Supabase URL and anon key in Netlify.");
       return;
+    } finally {
+      setLoading(false);
     }
     router.push("/admin");
+  }
+
+  async function handleRecovery() {
+    setMessage("");
+    if (!email || !email.includes("@")) {
+      setMessage("Enter your email first.");
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+    if (!isSupabaseConfigured() || !supabase) {
+      setMessage("Supabase is not configured yet.");
+      return;
+    }
+
+    setRecoveryLoading(true);
+    try {
+      const redirectTo = window.location.origin + "/reset-password";
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) {
+        setMessage(error.message);
+        return;
+      }
+      setMessage("Password reset link sent. Check your email.");
+    } catch {
+      setMessage("Could not send the reset email. Check the Supabase settings.");
+    } finally {
+      setRecoveryLoading(false);
+    }
   }
 
   return (
@@ -60,6 +96,9 @@ export function LoginForm() {
           </div>
           <button type="submit" disabled={loading} className="gradient-button w-full rounded-2xl px-4 py-3 font-semibold disabled:opacity-60">
             {loading ? "Signing in" : "Login"}
+          </button>
+          <button type="button" onClick={handleRecovery} disabled={recoveryLoading} className="w-full rounded-2xl border border-line bg-card px-4 py-3 text-sm font-semibold text-white disabled:opacity-60">
+            {recoveryLoading ? "Sending reset link" : "Forgot password?"}
           </button>
           {!isSupabaseConfigured() ? <p className="text-center text-xs text-muted">Demo mode is active until Supabase env vars are added.</p> : null}
           {message ? <p className="text-center text-sm text-rose-300">{message}</p> : null}
