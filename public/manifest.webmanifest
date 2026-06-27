@@ -1,0 +1,17 @@
+{
+  "name": "DJ Connect",
+  "short_name": "DJ Connect",
+  "start_url": "/event/sunset-rooftop-party",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "description": "Interactive QR event app for DJs, venues and guests.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

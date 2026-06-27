@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="DJ Connect">
+  <rect width="512" height="512" rx="112" fill="#050505"/>
+  <circle cx="256" cy="256" r="162" fill="#141414" stroke="#2A2A2A" stroke-width="18"/>
+  <circle cx="256" cy="256" r="68" fill="#7C3AED"/>
+  <path d="M168 184h176M168 328h176" stroke="#D946EF" stroke-width="26" stroke-linecap="round"/>
+  <path d="M198 256h116" stroke="#2563EB" stroke-width="26" stroke-linecap="round"/>
+</svg>
