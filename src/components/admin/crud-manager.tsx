@@ -13,9 +13,11 @@ export type CrudOption = string | { label: string; value: string };
 export type CrudField = {
   name: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "boolean" | "select" | "date" | "time" | "url" | "image" | "tags" | "hidden";
+  type?: "text" | "textarea" | "number" | "boolean" | "select" | "multiselect" | "date" | "time" | "url" | "image" | "tags" | "hidden";
   options?: CrudOption[];
   required?: boolean;
+  description?: string;
+  placeholder?: string;
 };
 
 type Filter = { column: string; value: string };
@@ -66,7 +68,7 @@ export function CrudManager({
       if (field.type === "tags") payload[field.name] = String(payload[field.name] || "").split(",").map((item) => item.trim()).filter(Boolean);
     });
     if (!payload.id) payload.id = createClientId(table);
-    if (table === "events" && payload.name) payload.slug = slugify(String(payload.name));
+    if ((table === "events" || table === "djs") && payload.name) payload.slug = slugify(String(payload.name));
     if (payload.name && !payload.slug && fields.some((field) => field.name === "slug")) payload.slug = slugify(String(payload.name));
     if (table === "events" && payload.slug) {
       const appUrl = typeof window !== "undefined" ? window.location.origin : "";

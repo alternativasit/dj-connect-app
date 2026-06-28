@@ -11,7 +11,15 @@ function displayValue(value: unknown, field?: CrudField) {
   });
   if (match && typeof match !== "string") return match.label;
   if (match) return match;
-  if (Array.isArray(value)) return value.join(", ");
+  if (Array.isArray(value)) {
+    if (field?.options?.length) {
+      return value.map((item) => {
+        const match = field.options?.find((option) => (typeof option === "string" ? option : option.value) === item);
+        return match && typeof match !== "string" ? match.label : item;
+      }).join(", ");
+    }
+    return value.join(", ");
+  }
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (value === null || value === undefined || value === "") return "-";
   return String(value);

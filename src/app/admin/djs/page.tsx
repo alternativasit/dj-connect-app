@@ -1,34 +1,95 @@
 import { CrudManager, type CrudField } from "@/components/admin/crud-manager";
 import { getAdminData } from "@/lib/data";
 
+const roleOptions = [
+  "DJ / Producer",
+  "DJ",
+  "Producer",
+  "Resident DJ",
+  "Guest DJ",
+  "Open Format DJ",
+  "Wedding DJ",
+  "Corporate DJ",
+  "MC / Host"
+];
+
+const cityOptions = [
+  "Mexico City",
+  "Monterrey",
+  "Guadalajara",
+  "Tulum",
+  "Cancun",
+  "Puebla",
+  "Queretaro",
+  "Miami",
+  "Los Angeles",
+  "New York",
+  "Las Vegas",
+  "Chicago",
+  "Dallas",
+  "Houston",
+  "San Diego",
+  "Austin"
+];
+
+const countryOptions = ["Mexico", "United States", "Canada", "Colombia", "Spain"];
+
+const genreOptions = [
+  "House",
+  "Tech House",
+  "Melodic",
+  "Deep House",
+  "EDM",
+  "Reggaeton",
+  "Latin",
+  "Pop",
+  "Hip-Hop",
+  "R&B",
+  "Open Format",
+  "Disco",
+  "Funk",
+  "Afrobeats",
+  "Regional Mexican",
+  "Rock"
+];
+
 const fields: CrudField[] = [
-  { name: "name", label: "Name", required: true },
-  { name: "slug", label: "Slug", required: true },
-  { name: "photo_url", label: "Photo", type: "image" },
-  { name: "logo_url", label: "Logo URL", type: "url" },
-  { name: "role", label: "Role" },
-  { name: "bio", label: "Bio", type: "textarea" },
-  { name: "city", label: "City" },
-  { name: "country", label: "Country" },
-  { name: "genres", label: "Genres", type: "tags" },
-  { name: "instagram_url", label: "Instagram", type: "url" },
-  { name: "tiktok_url", label: "TikTok", type: "url" },
-  { name: "youtube_url", label: "YouTube", type: "url" },
-  { name: "featured_video_url", label: "Featured video", type: "url" },
-  { name: "soundcloud_url", label: "SoundCloud", type: "url" },
-  { name: "mixcloud_url", label: "Mixcloud", type: "url" },
-  { name: "whatsapp", label: "WhatsApp" },
-  { name: "email", label: "Email" },
-  { name: "booking_url", label: "Booking URL", type: "url" },
-  { name: "tip_paypal_url", label: "PayPal", type: "url" },
-  { name: "tip_venmo_url", label: "Venmo", type: "url" },
-  { name: "tip_cashapp_url", label: "Cash App", type: "url" },
-  { name: "tip_stripe_url", label: "Stripe", type: "url" },
-  { name: "tip_mercadopago_url", label: "Mercado Pago", type: "url" },
-  { name: "is_active", label: "Is active", type: "boolean" }
+  { name: "name", label: "DJ name", required: true, placeholder: "Alex Beat", description: "Public artist name shown on the DJ profile and event pages." },
+  { name: "slug", label: "Slug", type: "hidden" },
+  { name: "photo_url", label: "Profile photo URL", type: "image", placeholder: "https://...", description: "Main DJ photo. Use a square or portrait image for the public profile." },
+  { name: "logo_url", label: "Cover / logo image URL", type: "image", placeholder: "https://...", description: "Optional cover, logo, or brand image for the DJ profile." },
+  { name: "role", label: "Profile role", type: "select", options: roleOptions, description: "Choose the title that best describes this DJ." },
+  { name: "bio", label: "Public bio", type: "textarea", placeholder: "Short intro, music style, residency, experience...", description: "Short description guests and venues will see on the DJ profile." },
+  { name: "city", label: "Base city", type: "select", options: cityOptions, description: "Main city where the DJ is based." },
+  { name: "country", label: "Country", type: "select", options: countryOptions, description: "Country used for the public DJ profile and booking context." },
+  { name: "genres", label: "Music genres", type: "multiselect", options: genreOptions, description: "Select all styles that apply. Guests will see these as profile tags." },
+  { name: "instagram_url", label: "Instagram URL", type: "url", placeholder: "https://instagram.com/alexbeatdj", description: "Full Instagram profile link." },
+  { name: "tiktok_url", label: "TikTok URL", type: "url", placeholder: "https://tiktok.com/@alexbeatdj", description: "Full TikTok profile link." },
+  { name: "youtube_url", label: "YouTube URL", type: "url", placeholder: "https://youtube.com/@alexbeatdj", description: "Channel or playlist link for videos and mixes." },
+  { name: "featured_video_url", label: "Profile video / featured song URL", type: "url", placeholder: "https://youtube.com/watch?v=...", description: "Video or song preview shown on the DJ profile. YouTube, YouTube Music, Spotify, Apple Music or SoundCloud links work best." },
+  { name: "soundcloud_url", label: "SoundCloud URL", type: "url", placeholder: "https://soundcloud.com/...", description: "Optional SoundCloud profile or mix link." },
+  { name: "mixcloud_url", label: "Mixcloud URL", type: "url", placeholder: "https://mixcloud.com/...", description: "Optional Mixcloud profile or mix link." },
+  { name: "whatsapp", label: "WhatsApp number", placeholder: "+52 55 1234 5678", description: "Booking contact number. Include country code." },
+  { name: "email", label: "Booking email", placeholder: "booking@alexbeat.com", description: "Email for bookings and event inquiries." },
+  { name: "booking_url", label: "Booking page URL", type: "url", placeholder: "https://...", description: "Optional external booking form, website or calendar link." },
+  { name: "tip_paypal_url", label: "PayPal tip link", type: "url", placeholder: "https://paypal.me/...", description: "External PayPal link used by Tip the DJ." },
+  { name: "tip_venmo_url", label: "Venmo tip link", type: "url", placeholder: "https://venmo.com/...", description: "External Venmo link used by Tip the DJ." },
+  { name: "tip_cashapp_url", label: "Cash App tip link", type: "url", placeholder: "https://cash.app/$...", description: "External Cash App link used by Tip the DJ." },
+  { name: "tip_stripe_url", label: "Stripe payment link", type: "url", placeholder: "https://buy.stripe.com/...", description: "Optional Stripe payment link for tips or deposits." },
+  { name: "tip_mercadopago_url", label: "Mercado Pago link", type: "url", placeholder: "https://mpago.la/...", description: "Optional Mercado Pago link for tips." },
+  { name: "is_active", label: "Active DJ profile", type: "boolean", description: "Turn this off to hide this DJ from public event pages." }
 ];
 
 export default async function AdminDjsPage() {
   const data = await getAdminData();
-  return <CrudManager title="DJs" description="Manage DJ profiles, social links, booking and tip links." table="djs" fields={fields} initialRows={data.djs as unknown as Record<string, unknown>[]} defaults={{ is_active: true, genres: [] }} />;
+  return (
+    <CrudManager
+      title="DJs"
+      description="Manage DJ profiles, media, social links, booking and tip links. Slug is generated automatically."
+      table="djs"
+      fields={fields}
+      initialRows={data.djs as unknown as Record<string, unknown>[]}
+      defaults={{ is_active: true, genres: [], role: "DJ / Producer", city: "Mexico City", country: "Mexico" }}
+    />
+  );
 }
