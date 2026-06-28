@@ -1,6 +1,9 @@
 import { CrudManager, type CrudField, type CrudOption } from "@/components/admin/crud-manager";
 import { getAdminData } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function toOptions(items: { id: string; name: string }[], emptyLabel?: string): CrudOption[] {
   const options: CrudOption[] = items.map((item) => ({ label: item.name, value: item.id }));
   return emptyLabel ? [{ label: emptyLabel, value: "" }, ...options] : options;
@@ -16,8 +19,8 @@ export default async function AdminEventsPage() {
   const fields: CrudField[] = [
     { name: "name", label: "Name", required: true },
     { name: "slug", label: "Slug", type: "hidden" },
-    { name: "dj_id", label: "DJ", type: "select", options: djOptions, required: true },
-    { name: "venue_id", label: "Venue", type: "select", options: venueOptions },
+    { name: "dj_id", label: "DJ", type: "select", options: djOptions, sourceTable: "djs", optionLabel: "name", emptyLabel: "Select DJ", required: true },
+    { name: "venue_id", label: "Venue", type: "select", options: venueOptions, sourceTable: "venues", optionLabel: "name", emptyLabel: "No venue selected" },
     { name: "description", label: "Description", type: "textarea" },
     { name: "event_date", label: "Event date", type: "date" },
     { name: "start_time", label: "Start time", type: "time" },

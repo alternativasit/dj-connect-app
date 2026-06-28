@@ -87,3 +87,27 @@ export async function POST(request: NextRequest) {
     return jsonError(error instanceof Error ? error.message : "Could not save.", 500);
   }
 }
+
+export async function GET(request: NextRequest) {
+  const table = request.nextUrl.searchParams.get("table") || "";
+  const filterColumn = request.nextUrl.searchParams.get("filterColumn");
+  const filterValue = request.nextUrl.searchParams.get("filterValue");
+
+  if (!allowedTables.has(table)) return jsonError("This table cannot be read from the admin panel.", 403);
+
+  const auth = await requireAdmin(request);
+  if ("error" in auth) return jsonError(auth.error || "Admin access failed.", auth.status || 500);
+
+  try {
+    let query = auth.supabase.from(table).select("*");
+    if (filterColumn && filterValue) query = query.eq(filterColumn, filterValue);
+    if (table === "events") query = query.order("event_date", { ascending: true });
+    else query = query.order("created_at", { ascending: false });
+
+    const { data, error } = await query;
+    if (error) return jsonError(error.message, 400);
+    return NextResponse.json({ ok: true, rows: data || [] });
+  } catch (error) {
+    return jsonError(error instanceof Error ? error.message : "Could not load records.", 500);
+  }
+}

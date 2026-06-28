@@ -3,6 +3,9 @@ import { getAdminData } from "@/lib/data";
 import { DjDirectory } from "@/components/admin/dj-directory";
 import { cityOptions, countryOptions } from "@/lib/location-options";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const roleOptions = [
   "DJ / Producer",
   "DJ",

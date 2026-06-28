@@ -15,6 +15,9 @@ export type CrudField = {
   label: string;
   type?: "text" | "textarea" | "number" | "boolean" | "select" | "combobox" | "multiselect" | "date" | "time" | "url" | "image" | "tags" | "hidden";
   options?: CrudOption[];
+  sourceTable?: string;
+  optionLabel?: string;
+  emptyLabel?: string;
   required?: boolean;
   description?: string;
   placeholder?: string;
@@ -55,6 +58,22 @@ async function runAdminMutation(input: { table: string; action: "insert" | "upda
   return result as { ok: boolean; row?: Record<string, unknown> };
 }
 
+async function runAdminList(table: string, filter?: Filter) {
+  const token = await getAdminToken();
+  if (!token) throw new Error("Please log in again before loading admin lists.");
+  const params = new URLSearchParams({ table });
+  if (filter) {
+    params.set("filterColumn", filter.column);
+    params.set("filterValue", filter.value);
+  }
+  const response = await fetch(`/api/admin/crud?${params.toString()}`, {
+    headers: { authorization: `Bearer ${token}` }
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(typeof result.error === "string" ? result.error : "Could not load admin lists.");
+  return (result.rows || []) as Record<string, unknown>[];
+}
+
 export function CrudManager({
   title,
   description,
@@ -73,9 +92,14 @@ export function CrudManager({
   filter?: Filter;
 }) {
   const [rows, setRows] = useState<Record<string, unknown>[]>(initialRows);
+  const [formFields, setFormFields] = useState<CrudField[]>(fields);
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [form, setForm] = useState<Record<string, unknown>>({ ...defaults });
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    setFormFields(fields);
+  }, [fields]);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -87,7 +111,41 @@ export function CrudManager({
     });
   }, [filter?.column, filter?.value, table]);
 
-  const tableFields = useMemo(() => fields.filter((field) => field.type !== "hidden"), [fields]);
+  useEffect(() => {
+    const sourcedFields = fields.filter((field) => field.sourceTable);
+    if (!sourcedFields.length) return;
+
+    let cancelled = false;
+    Promise.all(
+      sourcedFields.map(async (field) => {
+        const list = await runAdminList(String(field.sourceTable));
+        const options = list.map((row) => ({
+          label: String(row[field.optionLabel || "name"] || row.name || row.id || "Unnamed"),
+          value: String(row.id || "")
+        }));
+        return {
+          name: field.name,
+          options: field.emptyLabel ? [{ label: field.emptyLabel, value: "" }, ...options] : options
+        };
+      })
+    )
+      .then((loadedOptions) => {
+        if (cancelled) return;
+        setFormFields((current) => current.map((field) => {
+          const match = loadedOptions.find((item) => item.name === field.name);
+          return match ? { ...field, options: match.options } : field;
+        }));
+      })
+      .catch((error) => {
+        if (!cancelled) setMessage(error instanceof Error ? error.message : "Could not load admin lists.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fields]);
+
+  const tableFields = useMemo(() => formFields.filter((field) => field.type !== "hidden"), [formFields]);
 
   function updateField(name: string, value: unknown) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -95,7 +153,7 @@ export function CrudManager({
 
   function normalizePayload(values: Record<string, unknown>) {
     const payload: Record<string, unknown> = { ...defaults, ...values };
-    fields.forEach((field) => {
+    formFields.forEach((field) => {
       if (field.type === "number") payload[field.name] = payload[field.name] === "" ? null : Number(payload[field.name]);
       if (field.type === "url") {
         const rawValue = String(payload[field.name] || "").trim();
@@ -112,7 +170,7 @@ export function CrudManager({
     });
     if (!payload.id) payload.id = createClientId(table);
     if ((table === "events" || table === "djs") && payload.name) payload.slug = slugify(String(payload.name));
-    if (payload.name && !payload.slug && fields.some((field) => field.name === "slug")) payload.slug = slugify(String(payload.name));
+    if (payload.name && !payload.slug && formFields.some((field) => field.name === "slug")) payload.slug = slugify(String(payload.name));
     if (table === "events" && payload.slug) {
       const appUrl = typeof window !== "undefined" ? window.location.origin : "";
       payload.qr_url = appUrl + "/event/" + String(payload.slug);
@@ -179,7 +237,7 @@ export function CrudManager({
           <Plus size={16} />New
         </button>
       </div>
-      <AdminForm fields={fields} values={form} onChange={updateField} onSubmit={save} submitLabel={editing ? "Save Changes" : "Create"} />
+      <AdminForm fields={formFields} values={form} onChange={updateField} onSubmit={save} submitLabel={editing ? "Save Changes" : "Create"} />
       {message ? <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm text-muted">{message}</p> : null}
       {rows.length ? <AdminTable rows={rows} fields={tableFields} onEdit={edit} onDelete={remove} /> : <EmptyState title="No records yet" />}
     </div>
