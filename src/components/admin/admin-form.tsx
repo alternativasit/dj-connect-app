@@ -1,7 +1,15 @@
 "use client";
 
 import { ImageUploader } from "@/components/admin/image-uploader";
-import type { CrudField } from "@/components/admin/crud-manager";
+import type { CrudField, CrudOption } from "@/components/admin/crud-manager";
+
+function getOptionValue(option: CrudOption) {
+  return typeof option === "string" ? option : option.value;
+}
+
+function getOptionLabel(option: CrudOption) {
+  return typeof option === "string" ? option : option.label;
+}
 
 export function AdminForm({ fields, values, onChange, onSubmit, submitLabel }: { fields: CrudField[]; values: Record<string, unknown>; onChange: (name: string, value: unknown) => void; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; submitLabel: string }) {
   return (
@@ -31,8 +39,8 @@ export function AdminForm({ fields, values, onChange, onSubmit, submitLabel }: {
           return (
             <div key={field.name}>
               <label className="text-sm font-medium text-white">{field.label}</label>
-              <select value={String(value || field.options?.[0] || "")} onChange={(event) => onChange(field.name, event.target.value)} className={commonClass}>
-                {field.options?.map((option) => <option key={option} value={option}>{option}</option>)}
+              <select value={String(value || getOptionValue(field.options?.[0] || ""))} onChange={(event) => onChange(field.name, event.target.value)} className={commonClass} required={field.required}>
+                {field.options?.map((option) => <option key={getOptionValue(option)} value={getOptionValue(option)}>{getOptionLabel(option)}</option>)}
               </select>
             </div>
           );

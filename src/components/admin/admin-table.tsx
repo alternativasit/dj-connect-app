@@ -4,7 +4,13 @@ import { Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CrudField } from "@/components/admin/crud-manager";
 
-function displayValue(value: unknown) {
+function displayValue(value: unknown, field?: CrudField) {
+  const match = field?.options?.find((option) => {
+    const optionValue = typeof option === "string" ? option : option.value;
+    return optionValue === value;
+  });
+  if (match && typeof match !== "string") return match.label;
+  if (match) return match;
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (value === null || value === undefined || value === "") return "-";
@@ -27,7 +33,7 @@ export function AdminTable({ rows, fields, onEdit, onDelete, className }: { rows
               <tr key={String(row.id)} className="border-b border-line/70 last:border-0">
                 {fields.slice(0, 6).map((field) => (
                   <td key={field.name} className="max-w-[240px] px-4 py-3 text-zinc-300">
-                    <span className="line-clamp-2">{displayValue(row[field.name])}</span>
+                    <span className="line-clamp-2">{displayValue(row[field.name], field)}</span>
                   </td>
                 ))}
                 <td className="px-4 py-3">

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
@@ -8,11 +8,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { createClientId, slugify } from "@/lib/utils";
 
+export type CrudOption = string | { label: string; value: string };
+
 export type CrudField = {
   name: string;
   label: string;
   type?: "text" | "textarea" | "number" | "boolean" | "select" | "date" | "time" | "url" | "image" | "tags" | "hidden";
-  options?: string[];
+  options?: CrudOption[];
   required?: boolean;
 };
 
@@ -60,9 +62,11 @@ export function CrudManager({
     const payload: Record<string, unknown> = { ...defaults, ...values };
     fields.forEach((field) => {
       if (field.type === "number") payload[field.name] = payload[field.name] === "" ? null : Number(payload[field.name]);
+      if (field.type === "select" && payload[field.name] === "") payload[field.name] = null;
       if (field.type === "tags") payload[field.name] = String(payload[field.name] || "").split(",").map((item) => item.trim()).filter(Boolean);
     });
     if (!payload.id) payload.id = createClientId(table);
+    if (table === "events" && payload.name) payload.slug = slugify(String(payload.name));
     if (payload.name && !payload.slug && fields.some((field) => field.name === "slug")) payload.slug = slugify(String(payload.name));
     if (table === "events" && payload.slug) {
       const appUrl = typeof window !== "undefined" ? window.location.origin : "";
