@@ -1,19 +1,44 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Radio } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { pollCreateSchema } from "@/lib/validations";
-import { createClientId } from "@/lib/utils";
+import { createClientId, formatEventDate } from "@/lib/utils";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { Poll, PollOption, PollType, PollVote } from "@/lib/types";
+import type { EventRecord, Poll, PollOption, PollType, PollVote } from "@/lib/types";
 
-export function AdminPollManager({ eventId, initialPolls, initialOptions, initialVotes }: { eventId: string; initialPolls: Poll[]; initialOptions: PollOption[]; initialVotes: PollVote[] }) {
+export function AdminPollManager({
+  eventId,
+  events,
+  initialPolls,
+  initialOptions,
+  initialVotes
+}: {
+  eventId: string;
+  events: EventRecord[];
+  initialPolls: Poll[];
+  initialOptions: PollOption[];
+  initialVotes: PollVote[];
+}) {
+  const router = useRouter();
   const [polls, setPolls] = useState<Poll[]>(initialPolls);
   const [options, setOptions] = useState<PollOption[]>(initialOptions);
   const [votes, setVotes] = useState<PollVote[]>(initialVotes);
+  const [selectedEventId, setSelectedEventId] = useState(eventId);
   const [form, setForm] = useState({ question: "", type: "genre" as PollType, options: "Reggaeton\nHouse\nPop\nHip-Hop", is_active: true, starts_at: "", ends_at: "" });
   const [message, setMessage] = useState("");
+
+  const selectedEvent = useMemo(() => events.find((event) => event.id === selectedEventId), [events, selectedEventId]);
+
+  useEffect(() => {
+    setSelectedEventId(eventId);
+    setPolls(initialPolls);
+    setOptions(initialOptions);
+    setVotes(initialVotes);
+    setMessage("");
+  }, [eventId, initialOptions, initialPolls, initialVotes]);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -41,7 +66,7 @@ export function AdminPollManager({ eventId, initialPolls, initialOptions, initia
 
     const poll: Poll = {
       id: createClientId("poll"),
-      event_id: eventId,
+      event_id: selectedEventId,
       question: parsed.data.question,
       type: parsed.data.type,
       is_active: parsed.data.is_active,
@@ -86,9 +111,29 @@ export function AdminPollManager({ eventId, initialPolls, initialOptions, initia
     <div className="space-y-5">
       <div>
         <h1 className="flex items-center gap-2 text-3xl font-black text-white"><Radio size={28} />Live Polls</h1>
-        <p className="mt-1 text-sm text-muted">Create active polls and watch results update.</p>
+        <p className="mt-1 text-sm text-muted">Create active polls and choose the event where guests will see them.</p>
       </div>
       <form onSubmit={createPoll} className="grid gap-4 rounded-[24px] border border-line bg-surface p-4 md:grid-cols-2">
+        <div className="md:col-span-2">
+          <label className="text-sm font-medium">Publish to event</label>
+          <p className="mt-1 text-xs text-muted">Choose the event where this Live Poll will appear for guests.</p>
+          <select
+            value={selectedEventId}
+            onChange={(event) => {
+              const nextEventId = event.target.value;
+              setSelectedEventId(nextEventId);
+              router.push("/admin/events/" + nextEventId + "/polls");
+            }}
+            className="mt-2 w-full rounded-2xl border border-line bg-night px-4 py-3 outline-none focus:border-violet"
+          >
+            {events.map((event) => (
+              <option key={event.id} value={event.id}>
+                {event.name} - {event.status} - {formatEventDate(event.event_date)}
+              </option>
+            ))}
+          </select>
+          {selectedEvent ? <p className="mt-2 text-xs text-zinc-500">Current event: {selectedEvent.name}</p> : null}
+        </div>
         <div className="md:col-span-2">
           <label className="text-sm font-medium">Question</label>
           <input value={form.question} onChange={(event) => setForm({ ...form, question: event.target.value })} className="mt-2 w-full rounded-2xl border border-line bg-night px-4 py-3 outline-none focus:border-violet" />
