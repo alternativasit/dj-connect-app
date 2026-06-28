@@ -64,7 +64,17 @@ export function CrudManager({
     const payload: Record<string, unknown> = { ...defaults, ...values };
     fields.forEach((field) => {
       if (field.type === "number") payload[field.name] = payload[field.name] === "" ? null : Number(payload[field.name]);
+      if (field.type === "url") {
+        const rawValue = String(payload[field.name] || "").trim();
+        if (!rawValue) payload[field.name] = null;
+        else payload[field.name] = /^[a-z][a-z0-9+.-]*:\/\//i.test(rawValue) ? rawValue : `https://${rawValue}`;
+      }
       if (field.type === "select" && payload[field.name] === "") payload[field.name] = null;
+      if (field.type === "multiselect") {
+        payload[field.name] = Array.isArray(payload[field.name])
+          ? payload[field.name]
+          : String(payload[field.name] || "").split(",").map((item) => item.trim()).filter(Boolean);
+      }
       if (field.type === "tags") payload[field.name] = String(payload[field.name] || "").split(",").map((item) => item.trim()).filter(Boolean);
     });
     if (!payload.id) payload.id = createClientId(table);

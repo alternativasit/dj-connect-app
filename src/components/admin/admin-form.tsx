@@ -111,7 +111,7 @@ export function AdminForm({ fields, values, onChange, onSubmit, submitLabel }: {
           <div key={field.name}>
             <FieldText field={field} />
             <input
-              type={field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "time" ? "time" : field.type === "url" ? "url" : "text"}
+              type={field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "time" ? "time" : "text"}
               value={Array.isArray(value) ? value.join(", ") : String(value || "")}
               onChange={(event) => onChange(field.name, event.target.value)}
               placeholder={field.placeholder}
