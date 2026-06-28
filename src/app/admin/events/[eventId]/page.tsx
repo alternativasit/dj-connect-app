@@ -5,6 +5,9 @@ import { DarkCard } from "@/components/ui/dark-card";
 import { getEventById } from "@/lib/data";
 import { getPublicEventUrl } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminEventDetailPage({ params }: { params: { eventId: string } }) {
   const bundle = await getEventById(params.eventId);
   const links = [

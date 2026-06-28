@@ -161,8 +161,22 @@ export async function getAdminData(): Promise<AdminData> {
 }
 
 export async function getEventById(eventId: string) {
+  const supabase = getSupabaseServiceClient() || getSupabaseServerClient();
+  if (supabase) {
+    try {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(eventId);
+      const query = supabase.from("events").select("slug").limit(1);
+      const { data, error } = isUuid
+        ? await query.eq("id", eventId).maybeSingle()
+        : await query.eq("slug", eventId).maybeSingle();
+
+      if (!error && data?.slug) return getEventBundle(String(data.slug));
+    } catch {
+      // Fall back to seed data below for local/demo mode.
+    }
+  }
+
   const found = seedEvents.find((item) => item.id === eventId || item.slug === eventId) || seedEvents[0];
-  const bundle = await getEventBundle(found.slug);
-  return bundle;
+  return getEventBundle(found.slug);
 }
 
