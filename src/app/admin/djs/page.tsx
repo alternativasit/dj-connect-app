@@ -1,5 +1,6 @@
 import { CrudManager, type CrudField } from "@/components/admin/crud-manager";
 import { getAdminData } from "@/lib/data";
+import { cityOptions, countryOptions } from "@/lib/location-options";
 
 const roleOptions = [
   "DJ / Producer",
@@ -13,26 +14,6 @@ const roleOptions = [
   "MC / Host"
 ];
 
-const cityOptions = [
-  "Mexico City",
-  "Monterrey",
-  "Guadalajara",
-  "Tulum",
-  "Cancun",
-  "Puebla",
-  "Queretaro",
-  "Miami",
-  "Los Angeles",
-  "New York",
-  "Las Vegas",
-  "Chicago",
-  "Dallas",
-  "Houston",
-  "San Diego",
-  "Austin"
-];
-
-const countryOptions = ["Mexico", "United States", "Canada", "Colombia", "Spain"];
 
 const genreOptions = [
   "House",
@@ -60,8 +41,8 @@ const fields: CrudField[] = [
   { name: "logo_url", label: "Cover / logo image URL", type: "image", placeholder: "https://...", description: "Optional cover, logo, or brand image for the DJ profile." },
   { name: "role", label: "Profile role", type: "select", options: roleOptions, description: "Choose the title that best describes this DJ." },
   { name: "bio", label: "Public bio", type: "textarea", placeholder: "Short intro, music style, residency, experience...", description: "Short description guests and venues will see on the DJ profile." },
-  { name: "city", label: "Base city", type: "select", options: cityOptions, description: "Main city where the DJ is based." },
-  { name: "country", label: "Country", type: "select", options: countryOptions, description: "Country used for the public DJ profile and booking context." },
+  { name: "city", label: "Base city", type: "combobox", options: cityOptions, placeholder: "Start typing a city or write a new one", description: "Choose a suggested city or type a new one if it is not listed." },
+  { name: "country", label: "Country", type: "combobox", options: countryOptions, placeholder: "Start typing a country or write a new one", description: "Choose a suggested country or type a new one if it is not listed." },
   { name: "genres", label: "Music genres", type: "multiselect", options: genreOptions, description: "Select all styles that apply. Guests will see these as profile tags." },
   { name: "instagram_url", label: "Instagram URL", type: "url", placeholder: "https://instagram.com/alexbeatdj", description: "Full Instagram profile link." },
   { name: "tiktok_url", label: "TikTok URL", type: "url", placeholder: "https://tiktok.com/@alexbeatdj", description: "Full TikTok profile link." },

@@ -57,6 +57,25 @@ export function AdminForm({ fields, values, onChange, onSubmit, submitLabel }: {
             </div>
           );
         }
+        if (field.type === "combobox") {
+          const listId = `admin-${field.name}-options`;
+          return (
+            <div key={field.name}>
+              <FieldText field={field} />
+              <input
+                list={listId}
+                value={String(value || "")}
+                onChange={(event) => onChange(field.name, event.target.value)}
+                placeholder={field.placeholder}
+                className={commonClass}
+                required={field.required}
+              />
+              <datalist id={listId}>
+                {field.options?.map((option) => <option key={getOptionValue(option)} value={getOptionValue(option)}>{getOptionLabel(option)}</option>)}
+              </datalist>
+            </div>
+          );
+        }
         if (field.type === "multiselect") {
           const selected = new Set(Array.isArray(value) ? value.map(String) : String(value || "").split(",").map((item) => item.trim()).filter(Boolean));
           return (

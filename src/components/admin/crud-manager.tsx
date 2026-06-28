@@ -13,7 +13,7 @@ export type CrudOption = string | { label: string; value: string };
 export type CrudField = {
   name: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "boolean" | "select" | "multiselect" | "date" | "time" | "url" | "image" | "tags" | "hidden";
+  type?: "text" | "textarea" | "number" | "boolean" | "select" | "combobox" | "multiselect" | "date" | "time" | "url" | "image" | "tags" | "hidden";
   options?: CrudOption[];
   required?: boolean;
   description?: string;
