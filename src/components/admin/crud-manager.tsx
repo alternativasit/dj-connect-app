@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
@@ -64,6 +64,10 @@ export function CrudManager({
     });
     if (!payload.id) payload.id = createClientId(table);
     if (payload.name && !payload.slug && fields.some((field) => field.name === "slug")) payload.slug = slugify(String(payload.name));
+    if (table === "events" && payload.slug) {
+      const appUrl = typeof window !== "undefined" ? window.location.origin : "";
+      payload.qr_url = appUrl + "/event/" + String(payload.slug);
+    }
     if (!payload.created_at) payload.created_at = new Date().toISOString();
     payload.updated_at = new Date().toISOString();
     return payload;
@@ -129,3 +133,4 @@ export function CrudManager({
     </div>
   );
 }
+

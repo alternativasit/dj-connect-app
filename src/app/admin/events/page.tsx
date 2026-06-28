@@ -1,4 +1,4 @@
-import { CrudManager, type CrudField } from "@/components/admin/crud-manager";
+﻿import { CrudManager, type CrudField } from "@/components/admin/crud-manager";
 import { getAdminData } from "@/lib/data";
 
 const fields: CrudField[] = [
@@ -14,7 +14,6 @@ const fields: CrudField[] = [
   { name: "address", label: "Address" },
   { name: "banner_url", label: "Banner", type: "image" },
   { name: "status", label: "Status", type: "select", options: ["Draft", "Live", "Finished"] },
-  { name: "qr_url", label: "QR URL", type: "url" },
   { name: "is_active", label: "Is active", type: "boolean" }
 ];
 
@@ -22,3 +21,4 @@ export default async function AdminEventsPage() {
   const data = await getAdminData();
   return <CrudManager title="Events" description="Create event slugs and QR-ready public pages." table="events" fields={fields} initialRows={data.events as unknown as Record<string, unknown>[]} defaults={{ status: "Draft", is_active: true }} />;
 }
+
