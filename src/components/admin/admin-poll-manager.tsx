@@ -56,8 +56,32 @@ export function AdminPollManager({
     };
   }, [eventId, polls]);
 
+  async function getAdminToken() {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return null;
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || null;
+  }
+
+  async function runAdminMutation(input: { table: string; action: "insert" | "update" | "delete"; id?: string; payload?: Record<string, unknown> }) {
+    const token = await getAdminToken();
+    if (!token) throw new Error("Please log in again before creating a poll.");
+    const response = await fetch("/api/admin/crud", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(input)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(typeof result.error === "string" ? result.error : "Could not create poll.");
+    return result as { ok: boolean; row?: Record<string, unknown> };
+  }
+
   async function createPoll(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setMessage("");
     const parsed = pollCreateSchema.safeParse(form);
     if (!parsed.success) {
       setMessage(parsed.error.issues[0]?.message || "Check poll fields.");
@@ -85,17 +109,18 @@ export function AdminPollManager({
     })).filter((option) => option.label) as PollOption[];
 
     try {
-      const supabase = getSupabaseBrowserClient();
-      if (supabase) {
-        const { error: pollError } = await supabase.from("polls").insert(poll);
-        if (pollError) throw pollError;
-        const { error: optionError } = await supabase.from("poll_options").insert(nextOptions);
-        if (optionError) throw optionError;
-      }
-      setPolls((current) => [poll, ...current]);
-      setOptions((current) => [...nextOptions, ...current]);
+      const pollResult = await runAdminMutation({ table: "polls", action: "insert", payload: poll as unknown as Record<string, unknown> });
+      const savedPoll = (pollResult.row || poll) as unknown as Poll;
+      const savedOptions = await Promise.all(
+        nextOptions.map(async (option) => {
+          const optionResult = await runAdminMutation({ table: "poll_options", action: "insert", payload: option as unknown as Record<string, unknown> });
+          return (optionResult.row || option) as unknown as PollOption;
+        })
+      );
+      setPolls((current) => [savedPoll, ...current]);
+      setOptions((current) => [...savedOptions, ...current]);
       setForm({ ...form, question: "" });
-      setMessage("Poll created.");
+      setMessage(`Poll created in ${selectedEvent?.name || "selected event"}.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not create poll.");
     }
