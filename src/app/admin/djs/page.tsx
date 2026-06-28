@@ -1,5 +1,6 @@
 import { CrudManager, type CrudField } from "@/components/admin/crud-manager";
 import { getAdminData } from "@/lib/data";
+import { DjDirectory } from "@/components/admin/dj-directory";
 import { cityOptions, countryOptions } from "@/lib/location-options";
 
 const roleOptions = [
@@ -64,13 +65,16 @@ const fields: CrudField[] = [
 export default async function AdminDjsPage() {
   const data = await getAdminData();
   return (
-    <CrudManager
-      title="DJs"
-      description="Manage DJ profiles, media, social links, booking and tip links. Slug is generated automatically."
-      table="djs"
-      fields={fields}
-      initialRows={data.djs as unknown as Record<string, unknown>[]}
-      defaults={{ is_active: true, genres: [], role: "DJ / Producer", city: "Mexico City", country: "Mexico" }}
-    />
+    <div className="space-y-5">
+      <DjDirectory djs={data.djs} events={data.events} />
+      <CrudManager
+        title="DJs"
+        description="Manage DJ profiles, media, social links, booking and tip links. Slug is generated automatically."
+        table="djs"
+        fields={fields}
+        initialRows={data.djs as unknown as Record<string, unknown>[]}
+        defaults={{ is_active: true, genres: [], role: "DJ / Producer", city: "Mexico City", country: "Mexico" }}
+      />
+    </div>
   );
 }
