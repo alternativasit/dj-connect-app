@@ -68,6 +68,16 @@ export async function POST(request: NextRequest) {
   try {
     if (action === "delete") {
       if (!id) return jsonError("Missing record ID.");
+      if (table === "polls") {
+        const { error: voteError } = await auth.supabase.from("poll_votes").delete().eq("poll_id", id);
+        if (voteError) return jsonError(voteError.message, 400);
+        const { error: optionError } = await auth.supabase.from("poll_options").delete().eq("poll_id", id);
+        if (optionError) return jsonError(optionError.message, 400);
+      }
+      if (table === "poll_options") {
+        const { error: voteError } = await auth.supabase.from("poll_votes").delete().eq("option_id", id);
+        if (voteError) return jsonError(voteError.message, 400);
+      }
       const { error } = await auth.supabase.from(table).delete().eq("id", id);
       if (error) return jsonError(error.message, 400);
       return NextResponse.json({ ok: true });

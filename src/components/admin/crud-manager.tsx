@@ -96,6 +96,9 @@ export function CrudManager({
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [form, setForm] = useState<Record<string, unknown>>({ ...defaults });
   const [message, setMessage] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const filterColumn = filter?.column;
+  const filterValue = filter?.value;
 
   useEffect(() => {
     setFormFields(fields);
@@ -105,11 +108,11 @@ export function CrudManager({
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
     let query = supabase.from(table).select("*");
-    if (filter) query = query.eq(filter.column, filter.value);
+    if (filterColumn && filterValue) query = query.eq(filterColumn, filterValue);
     query.then(({ data }) => {
       if (data) setRows(data as Record<string, unknown>[]);
     });
-  }, [filter?.column, filter?.value, table]);
+  }, [filterColumn, filterValue, table]);
 
   useEffect(() => {
     const sourcedFields = fields.filter((field) => field.sourceTable);
@@ -204,6 +207,7 @@ export function CrudManager({
       });
       setEditing(null);
       setForm({ ...defaults });
+      setFormOpen(false);
       setMessage(`${getRecordLabel(table)} ${wasEditing ? "updated" : "created"} successfully.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not save.");
@@ -224,6 +228,13 @@ export function CrudManager({
   function edit(row: Record<string, unknown>) {
     setEditing(row);
     setForm(row);
+    setFormOpen(true);
+  }
+
+  function resetForm() {
+    setEditing(null);
+    setForm({ ...defaults });
+    setFormOpen(false);
   }
 
   return (
@@ -233,11 +244,21 @@ export function CrudManager({
           <h1 className="text-3xl font-black text-white">{title}</h1>
           {description ? <p className="mt-1 text-sm text-muted">{description}</p> : null}
         </div>
-        <button type="button" onClick={() => { setEditing(null); setForm({ ...defaults }); }} className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-white">
+        <button type="button" onClick={() => { setMessage(""); setEditing(null); setForm({ ...defaults }); setFormOpen(true); }} className="flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-white">
           <Plus size={16} />New
         </button>
       </div>
-      <AdminForm fields={formFields} values={form} onChange={updateField} onSubmit={save} submitLabel={editing ? "Save Changes" : "Create"} />
+      {formOpen ? (
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-bold text-white">{editing ? `Edit ${getRecordLabel(table)}` : `Create ${getRecordLabel(table)}`}</h2>
+            <button type="button" onClick={resetForm} className="rounded-2xl border border-line bg-night px-4 py-2 text-sm font-semibold text-muted hover:text-white">
+              Cancel
+            </button>
+          </div>
+          <AdminForm fields={formFields} values={form} onChange={updateField} onSubmit={save} submitLabel={editing ? "Save Changes" : "Create"} />
+        </div>
+      ) : null}
       {message ? <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm text-muted">{message}</p> : null}
       {rows.length ? <AdminTable rows={rows} fields={tableFields} onEdit={edit} onDelete={remove} /> : <EmptyState title="No records yet" />}
     </div>

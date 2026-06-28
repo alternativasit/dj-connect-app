@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Radio } from "lucide-react";
+import { Radio, Square, Trash2 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { pollCreateSchema } from "@/lib/validations";
 import { createClientId, formatEventDate } from "@/lib/utils";
@@ -31,6 +31,7 @@ export function AdminPollManager({
   const [message, setMessage] = useState("");
 
   const selectedEvent = useMemo(() => events.find((event) => event.id === selectedEventId), [events, selectedEventId]);
+  const activePolls = useMemo(() => polls.filter((poll) => poll.is_active), [polls]);
 
   useEffect(() => {
     setSelectedEventId(eventId);
@@ -75,7 +76,7 @@ export function AdminPollManager({
       body: JSON.stringify(input)
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(typeof result.error === "string" ? result.error : "Could not create poll.");
+    if (!response.ok) throw new Error(typeof result.error === "string" ? result.error : "Could not save poll.");
     return result as { ok: boolean; row?: Record<string, unknown> };
   }
 
@@ -123,6 +124,33 @@ export function AdminPollManager({
       setMessage(`Poll created in ${selectedEvent?.name || "selected event"}.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not create poll.");
+    }
+  }
+
+  async function endPoll(poll: Poll) {
+    setMessage("");
+    const nextPoll: Poll = { ...poll, is_active: false, updated_at: new Date().toISOString() };
+    try {
+      const result = await runAdminMutation({ table: "polls", action: "update", id: poll.id, payload: nextPoll as unknown as Record<string, unknown> });
+      const savedPoll = (result.row || nextPoll) as unknown as Poll;
+      setPolls((current) => current.map((item) => item.id === poll.id ? savedPoll : item));
+      setMessage("Poll ended. It is no longer visible to guests.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not end poll.");
+    }
+  }
+
+  async function deletePoll(poll: Poll) {
+    if (!window.confirm("Delete this poll and its votes?")) return;
+    setMessage("");
+    try {
+      await runAdminMutation({ table: "polls", action: "delete", id: poll.id });
+      setPolls((current) => current.filter((item) => item.id !== poll.id));
+      setOptions((current) => current.filter((option) => option.poll_id !== poll.id));
+      setVotes((current) => current.filter((vote) => vote.poll_id !== poll.id));
+      setMessage("Poll deleted successfully.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not delete poll.");
     }
   }
 
@@ -180,7 +208,7 @@ export function AdminPollManager({
       </form>
       {message ? <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm text-muted">{message}</p> : null}
       <div className="grid gap-4 lg:grid-cols-2">
-        {polls.map((poll) => {
+        {activePolls.length ? activePolls.map((poll) => {
           const result = resultFor(poll);
           return (
             <article key={poll.id} className="rounded-[24px] border border-line bg-surface p-4">
@@ -190,6 +218,14 @@ export function AdminPollManager({
                   <p className="text-sm text-muted">{poll.type} · {poll.is_active ? "Active" : "Paused"}</p>
                 </div>
                 <span className="rounded-full border border-line px-2 py-1 text-xs text-zinc-300">{result.total} votes</span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" onClick={() => endPoll(poll)} className="inline-flex items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-100">
+                  <Square size={13} /> End poll
+                </button>
+                <button type="button" onClick={() => deletePoll(poll)} className="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-100">
+                  <Trash2 size={13} /> Delete
+                </button>
               </div>
               <div className="mt-4 space-y-3">
                 {result.pollOptions.map((option) => {
@@ -205,7 +241,9 @@ export function AdminPollManager({
               </div>
             </article>
           );
-        })}
+        }) : (
+          <p className="rounded-[24px] border border-line bg-surface p-5 text-sm text-muted lg:col-span-2">No active polls for this event yet.</p>
+        )}
       </div>
     </div>
   );
