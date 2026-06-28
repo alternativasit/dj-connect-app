@@ -1,18 +1,26 @@
-"use client";
+﻿"use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Check, ExternalLink, ListMusic, Play, Trash2, X } from "lucide-react";
 import { MusicPreviewCard } from "@/components/event/music-preview-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { formatDateTime } from "@/lib/utils";
-import type { SongRequest, SongRequestStatus } from "@/lib/types";
+import { formatDateTime, formatEventDate } from "@/lib/utils";
+import type { EventRecord, SongRequest, SongRequestStatus } from "@/lib/types";
 
 const statuses: SongRequestStatus[] = ["Pending", "Approved", "Played", "Rejected"];
 
-export function AdminRequestsBoard({ eventId, initialRequests }: { eventId: string; initialRequests: SongRequest[] }) {
+export function AdminRequestsBoard({ eventId, events, initialRequests }: { eventId: string; events: EventRecord[]; initialRequests: SongRequest[] }) {
+  const router = useRouter();
   const [requests, setRequests] = useState<SongRequest[]>(initialRequests);
   const [message, setMessage] = useState("");
+  const selectedEvent = useMemo(() => events.find((event) => event.id === eventId), [eventId, events]);
+
+  useEffect(() => {
+    setRequests(initialRequests);
+    setMessage("");
+  }, [eventId, initialRequests]);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -80,6 +88,31 @@ export function AdminRequestsBoard({ eventId, initialRequests }: { eventId: stri
         <h1 className="flex items-center gap-2 text-3xl font-black text-white"><ListMusic size={28} />Song Requests</h1>
         <p className="mt-1 text-sm text-muted">Realtime requests from guests.</p>
       </div>
+      <div className="rounded-[24px] border border-line bg-surface p-4">
+        <label className="text-sm font-semibold text-white">View requests by event</label>
+        <p className="mt-1 text-xs text-muted">Choose an event to see only the songs requested for that event.</p>
+        <select
+          value={eventId}
+          onChange={(event) => {
+            const nextEventId = event.target.value;
+            setMessage("");
+            setRequests([]);
+            router.push("/admin/events/" + nextEventId + "/requests");
+          }}
+          className="mt-3 w-full rounded-2xl border border-line bg-night px-4 py-3 text-white outline-none focus:border-violet"
+        >
+          {events.map((event) => (
+            <option key={event.id} value={event.id}>
+              {event.name} - {event.status} - {formatEventDate(event.event_date)}
+            </option>
+          ))}
+        </select>
+        {selectedEvent ? (
+          <p className="mt-2 text-xs text-zinc-500">
+            Current event: {selectedEvent.name} - {selectedEvent.status}
+          </p>
+        ) : null}
+      </div>
       {message ? <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm text-muted">{message}</p> : null}
       <div className="grid gap-4 xl:grid-cols-4">
         {statuses.map((status) => (
@@ -116,3 +149,4 @@ export function AdminRequestsBoard({ eventId, initialRequests }: { eventId: stri
     </div>
   );
 }
+

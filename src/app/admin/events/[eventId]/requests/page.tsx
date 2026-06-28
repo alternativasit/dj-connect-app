@@ -1,7 +1,14 @@
 import { AdminRequestsBoard } from "@/components/admin/admin-requests-board";
-import { getEventById } from "@/lib/data";
+import { getAdminData, getEventById } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminRequestsPage({ params }: { params: { eventId: string } }) {
-  const bundle = await getEventById(params.eventId);
-  return <AdminRequestsBoard eventId={bundle.event.id} initialRequests={bundle.songRequests} />;
+  const [bundle, adminData] = await Promise.all([
+    getEventById(params.eventId),
+    getAdminData()
+  ]);
+
+  return <AdminRequestsBoard eventId={bundle.event.id} events={adminData.events} initialRequests={bundle.songRequests} />;
 }
