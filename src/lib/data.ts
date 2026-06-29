@@ -1,5 +1,6 @@
 ﻿import { getSupabaseServerClient } from "@/lib/supabase/client";
 import { getSupabaseServiceClient } from "@/lib/supabase/service";
+import { unstable_noStore as noStore } from "next/cache";
 import type {
   AdminData,
   DJ,
@@ -64,17 +65,22 @@ function getSeedAdminData(): AdminData {
   });
 }
 
-export async function getEventBundle(eventSlug: string): Promise<EventBundle> {
+export async function getEventBundle(eventSlug: string, options?: { includeInactive?: boolean }): Promise<EventBundle> {
+  noStore();
   const supabase = getSupabaseServiceClient() || getSupabaseServerClient();
   if (!supabase) return getSeedBundle(eventSlug);
 
   try {
-    const { data: event, error } = await supabase
+    let eventQuery = supabase
       .from("events")
       .select("*")
-      .eq("slug", eventSlug)
-      .eq("is_active", true)
-      .maybeSingle();
+      .eq("slug", eventSlug);
+
+    if (!options?.includeInactive) {
+      eventQuery = eventQuery.eq("is_active", true);
+    }
+
+    const { data: event, error } = await eventQuery.maybeSingle();
 
     if (error || !event) return getSeedBundle(eventSlug);
 
@@ -120,6 +126,7 @@ export async function getEventBundle(eventSlug: string): Promise<EventBundle> {
 }
 
 export async function getAdminData(): Promise<AdminData> {
+  noStore();
   const supabase = getSupabaseServiceClient() || getSupabaseServerClient();
   if (!supabase) return getSeedAdminData();
 
@@ -160,7 +167,8 @@ export async function getAdminData(): Promise<AdminData> {
   }
 }
 
-export async function getEventById(eventId: string) {
+export async function getEventById(eventId: string): Promise<EventBundle | null> {
+  noStore();
   const supabase = getSupabaseServiceClient() || getSupabaseServerClient();
   if (supabase) {
     try {
@@ -170,13 +178,14 @@ export async function getEventById(eventId: string) {
         ? await query.eq("id", eventId).maybeSingle()
         : await query.eq("slug", eventId).maybeSingle();
 
-      if (!error && data?.slug) return getEventBundle(String(data.slug));
+      if (!error && data?.slug) return getEventBundle(String(data.slug), { includeInactive: true });
+      return null;
     } catch {
-      // Fall back to seed data below for local/demo mode.
+      return null;
     }
   }
 
-  const found = seedEvents.find((item) => item.id === eventId || item.slug === eventId) || seedEvents[0];
-  return getEventBundle(found.slug);
+  const found = seedEvents.find((item) => item.id === eventId || item.slug === eventId);
+  return found ? getEventBundle(found.slug) : null;
 }
 

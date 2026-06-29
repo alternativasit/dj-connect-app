@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { AdminPollManager } from "@/components/admin/admin-poll-manager";
 import { getAdminData, getEventById } from "@/lib/data";
 
@@ -6,6 +7,8 @@ export const revalidate = 0;
 
 export default async function AdminPollsPage({ params }: { params: { eventId: string } }) {
   const [bundle, adminData] = await Promise.all([getEventById(params.eventId), getAdminData()]);
+  if (!bundle) notFound();
+
   return (
     <AdminPollManager
       eventId={bundle.event.id}

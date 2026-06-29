@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Gift, GlassWater, ListMusic, QrCode, Radio } from "lucide-react";
 import { EventDetailActions } from "@/components/admin/event-detail-actions";
 import { QRCard } from "@/components/event/qr-card";
@@ -11,6 +12,8 @@ export const revalidate = 0;
 
 export default async function AdminEventDetailPage({ params }: { params: { eventId: string } }) {
   const bundle = await getEventById(params.eventId);
+  if (!bundle) notFound();
+
   const links = [
     { label: "Song Requests", href: "/admin/events/" + bundle.event.id + "/requests", icon: <ListMusic size={18} /> },
     { label: "Live Polls", href: "/admin/events/" + bundle.event.id + "/polls", icon: <Radio size={18} /> },

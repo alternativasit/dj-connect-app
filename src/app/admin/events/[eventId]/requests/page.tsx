@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { AdminRequestsBoard } from "@/components/admin/admin-requests-board";
 import { getAdminData, getEventById } from "@/lib/data";
 
@@ -9,6 +10,7 @@ export default async function AdminRequestsPage({ params }: { params: { eventId:
     getEventById(params.eventId),
     getAdminData()
   ]);
+  if (!bundle) notFound();
 
   return <AdminRequestsBoard eventId={bundle.event.id} events={adminData.events} initialRequests={bundle.songRequests} />;
 }

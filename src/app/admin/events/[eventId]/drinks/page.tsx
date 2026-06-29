@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { CrudManager, type CrudField } from "@/components/admin/crud-manager";
 import { getEventById } from "@/lib/data";
 
@@ -15,5 +16,7 @@ const fields: CrudField[] = [
 
 export default async function AdminDrinksPage({ params }: { params: { eventId: string } }) {
   const bundle = await getEventById(params.eventId);
+  if (!bundle) notFound();
+
   return <CrudManager title="Drinks Menu" description={bundle.event.name} table="drinks" fields={fields} initialRows={bundle.drinks as unknown as Record<string, unknown>[]} defaults={{ event_id: bundle.event.id, category: "Cocktails", is_available: true, display_order: 1 }} filter={{ column: "event_id", value: bundle.event.id }} />;
 }

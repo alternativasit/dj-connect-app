@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { EventRecord } from "@/lib/types";
 
@@ -89,7 +90,7 @@ export function EventDetailActions({ event }: { event: EventRecord }) {
           <h2 className="text-xl font-bold text-white">Event actions</h2>
           <p className="mt-1 text-sm text-muted">Manage this event without leaving the detail page.</p>
         </div>
-        <span className="rounded-full border border-line bg-night px-3 py-1 text-xs font-semibold text-white">{event.status}</span>
+        <StatusBadge status={event.status} />
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
