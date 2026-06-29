@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { BarChart3, Building2, CalendarDays, Disc3, GalleryHorizontal, GlassWater, Gift, LogOut, Music2, Package, Radio, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { SiteFooter } from "@/components/ui/site-footer";
 import type { ReactNode } from "react";
 
 export function AdminShell({ children }: { children: ReactNode }) {
@@ -56,7 +57,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <LogOut size={16} />Logout
         </button>
       </aside>
-      <main className="min-w-0 p-4 lg:h-screen lg:overflow-y-auto lg:p-8">{children}</main>
+      <main className="min-w-0 p-4 lg:h-screen lg:overflow-y-auto lg:p-8">
+        {children}
+        <SiteFooter compact />
+      </main>
     </div>
   );
 }
