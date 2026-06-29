@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Gift, GlassWater, ListMusic, QrCode, Radio } from "lucide-react";
+import { EventDetailActions } from "@/components/admin/event-detail-actions";
 import { QRCard } from "@/components/event/qr-card";
 import { DarkCard } from "@/components/ui/dark-card";
 import { getEventById } from "@/lib/data";
@@ -39,6 +40,7 @@ export default async function AdminEventDetailPage({ params }: { params: { event
           </div>
         </DarkCard>
       </div>
+      <EventDetailActions event={bundle.event} />
     </div>
   );
 }

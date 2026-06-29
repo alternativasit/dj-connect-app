@@ -68,6 +68,26 @@ export async function POST(request: NextRequest) {
   try {
     if (action === "delete") {
       if (!id) return jsonError("Missing record ID.");
+      if (table === "events") {
+        const { data: eventPolls, error: pollLookupError } = await auth.supabase.from("polls").select("id").eq("event_id", id);
+        if (pollLookupError) return jsonError(pollLookupError.message, 400);
+        const pollIds = (eventPolls || []).map((poll) => poll.id).filter(Boolean);
+
+        if (pollIds.length) {
+          const { error: voteError } = await auth.supabase.from("poll_votes").delete().in("poll_id", pollIds);
+          if (voteError) return jsonError(voteError.message, 400);
+          const { error: optionError } = await auth.supabase.from("poll_options").delete().in("poll_id", pollIds);
+          if (optionError) return jsonError(optionError.message, 400);
+          const { error: pollError } = await auth.supabase.from("polls").delete().in("id", pollIds);
+          if (pollError) return jsonError(pollError.message, 400);
+        }
+
+        const relatedTables = ["song_requests", "drinks", "promos", "gallery_items", "tip_clicks", "sponsor_clicks"];
+        for (const relatedTable of relatedTables) {
+          const { error: relatedError } = await auth.supabase.from(relatedTable).delete().eq("event_id", id);
+          if (relatedError) return jsonError(relatedError.message, 400);
+        }
+      }
       if (table === "polls") {
         const { error: voteError } = await auth.supabase.from("poll_votes").delete().eq("poll_id", id);
         if (voteError) return jsonError(voteError.message, 400);

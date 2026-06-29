@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { AdminForm } from "@/components/admin/admin-form";
 import { AdminTable } from "@/components/admin/admin-table";
@@ -91,6 +92,7 @@ export function CrudManager({
   defaults?: Record<string, unknown>;
   filter?: Filter;
 }) {
+  const searchParams = useSearchParams();
   const [rows, setRows] = useState<Record<string, unknown>[]>(initialRows);
   const [formFields, setFormFields] = useState<CrudField[]>(fields);
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
@@ -103,6 +105,15 @@ export function CrudManager({
   useEffect(() => {
     setFormFields(fields);
   }, [fields]);
+
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setMessage("");
+      setEditing(null);
+      setForm({ ...defaults });
+      setFormOpen(true);
+    }
+  }, [defaults, searchParams]);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
