@@ -20,6 +20,7 @@ export default async function AdminEventDetailPage({ params }: { params: { event
     { label: "Drinks Menu", href: "/admin/events/" + bundle.event.id + "/drinks", icon: <GlassWater size={18} /> },
     { label: "Event Promos", href: "/admin/events/" + bundle.event.id + "/promos", icon: <Gift size={18} /> }
   ];
+  const eventPreviewQuery = "?preview=admin";
 
   return (
     <div className="space-y-5">
@@ -38,8 +39,8 @@ export default async function AdminEventDetailPage({ params }: { params: { event
                 <span className="text-violet">{link.icon}</span>{link.label}
               </Link>
             ))}
-            <Link href={"/event/" + bundle.event.slug + "/screen"} className="gradient-button rounded-2xl px-4 py-4 text-center font-semibold text-white">Screen Mode</Link>
-            <Link href={"/event/" + bundle.event.slug} className="rounded-2xl border border-line bg-night px-4 py-4 text-center font-semibold text-white">Guest Home</Link>
+            <Link href={"/event/" + bundle.event.slug + "/screen" + eventPreviewQuery} className="gradient-button rounded-2xl px-4 py-4 text-center font-semibold text-white">Screen Mode</Link>
+            <Link href={"/event/" + bundle.event.slug + eventPreviewQuery} className="rounded-2xl border border-line bg-night px-4 py-4 text-center font-semibold text-white">Guest Home</Link>
           </div>
         </DarkCard>
       </div>

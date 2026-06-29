@@ -5,22 +5,23 @@ import { Home, Music2, QrCode, Radio, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export function BottomNav({ eventSlug }: { eventSlug: string }) {
+export function BottomNav({ eventSlug, previewMode = false }: { eventSlug: string; previewMode?: boolean }) {
   const pathname = usePathname();
   const base = "/event/" + eventSlug;
+  const previewQuery = previewMode ? "?preview=admin" : "";
   const items = [
-    { label: "Home", href: base, icon: Home },
-    { label: "Songs", href: base + "/request-song", icon: Music2 },
-    { label: "Scan", href: base + "#qr", icon: QrCode },
-    { label: "Polls", href: base + "/polls", icon: Radio },
-    { label: "Profile", href: base + "/dj", icon: UserRound }
+    { label: "Home", href: base + previewQuery, icon: Home },
+    { label: "Songs", href: base + "/request-song" + previewQuery, icon: Music2 },
+    { label: "Scan", href: base + previewQuery + "#qr", icon: QrCode },
+    { label: "Polls", href: base + "/polls" + previewQuery, icon: Radio },
+    { label: "Profile", href: base + "/dj" + previewQuery, icon: UserRound }
   ];
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-night/92 px-3 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl">
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {
-          const active = item.href === base ? pathname === base : pathname.startsWith(item.href.split("#")[0]);
+          const active = item.href.split("?")[0] === base ? pathname === base : pathname.startsWith(item.href.split("?")[0].split("#")[0]);
           const Icon = item.icon;
           return (
             <Link

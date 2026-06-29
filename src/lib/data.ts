@@ -65,7 +65,7 @@ function getSeedAdminData(): AdminData {
   });
 }
 
-export async function getEventBundle(eventSlug: string, options?: { includeInactive?: boolean }): Promise<EventBundle> {
+export async function getEventBundle(eventSlug: string, options?: { includeInactive?: boolean }): Promise<EventBundle | null> {
   noStore();
   const supabase = getSupabaseServiceClient() || getSupabaseServerClient();
   if (!supabase) return getSeedBundle(eventSlug);
@@ -82,7 +82,7 @@ export async function getEventBundle(eventSlug: string, options?: { includeInact
 
     const { data: event, error } = await eventQuery.maybeSingle();
 
-    if (error || !event) return getSeedBundle(eventSlug);
+    if (error || !event) return null;
 
     const typedEvent = event as EventRecord;
     const [djResult, venueResult, requestsResult, pollsResult, drinksResult, promosResult, packagesResult, galleryResult, upcomingResult] = await Promise.all([
@@ -121,7 +121,7 @@ export async function getEventBundle(eventSlug: string, options?: { includeInact
       gallery: (galleryResult.data || []) as GalleryItem[]
     };
   } catch {
-    return getSeedBundle(eventSlug);
+    return null;
   }
 }
 

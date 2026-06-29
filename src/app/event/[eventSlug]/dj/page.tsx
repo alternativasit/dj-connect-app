@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { CalendarDays, ExternalLink, HeartHandshake, Mail, MessageCircle } from "lucide-react";
 import { AppShell } from "@/components/event/app-shell";
 import { MusicPreviewCard } from "@/components/event/music-preview-card";
@@ -9,8 +10,12 @@ import { formatCurrency, formatEventDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function DJPage({ params }: { params: { eventSlug: string } }) {
-  const bundle = await getEventBundle(params.eventSlug);
+export default async function DJPage({ params, searchParams }: { params: { eventSlug: string }; searchParams?: { preview?: string } }) {
+  const isAdminPreview = searchParams?.preview === "admin";
+  const previewQuery = isAdminPreview ? "?preview=admin" : "";
+  const bundle = await getEventBundle(params.eventSlug, { includeInactive: isAdminPreview });
+  if (!bundle) notFound();
+
   const base = "/event/" + bundle.event.slug;
   const socialLinks = [
     { label: "Instagram", url: bundle.dj.instagram_url },
@@ -21,7 +26,7 @@ export default async function DJPage({ params }: { params: { eventSlug: string }
   ].filter((item) => item.url);
 
   return (
-    <AppShell eventSlug={bundle.event.slug} eventId={bundle.event.id} title="DJ Profile" subtitle={bundle.dj.name} status={bundle.event.status}>
+    <AppShell eventSlug={bundle.event.slug} eventId={bundle.event.id} title="DJ Profile" subtitle={bundle.dj.name} status={bundle.event.status} previewMode={isAdminPreview}>
       <div className="space-y-5">
         <DarkCard className="overflow-hidden p-0">
           <div className="h-56 bg-surface2">
@@ -48,7 +53,7 @@ export default async function DJPage({ params }: { params: { eventSlug: string }
         ) : null}
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <Link href={base + "/tip"} className="gradient-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3 font-semibold text-white"><HeartHandshake size={18} />Tip the DJ</Link>
+          <Link href={base + "/tip" + previewQuery} className="gradient-button flex items-center justify-center gap-2 rounded-2xl px-4 py-3 font-semibold text-white"><HeartHandshake size={18} />Tip the DJ</Link>
           <a href={bundle.dj.booking_url || "mailto:" + bundle.dj.email} className="flex items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3 font-semibold text-white"><Mail size={18} />Book Now</a>
         </div>
 
@@ -108,6 +113,3 @@ export default async function DJPage({ params }: { params: { eventSlug: string }
     </AppShell>
   );
 }
-
-
-
