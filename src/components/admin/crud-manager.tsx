@@ -36,6 +36,17 @@ function getRecordLabel(table: string) {
   return "Record";
 }
 
+const tablesWithUpdatedAt = new Set([
+  "djs",
+  "venues",
+  "events",
+  "song_requests",
+  "polls",
+  "drinks",
+  "promos",
+  "dj_packages"
+]);
+
 async function getAdminToken() {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return null;
@@ -190,7 +201,11 @@ export function CrudManager({
       payload.qr_url = appUrl + "/event/" + String(payload.slug);
     }
     if (!payload.created_at) payload.created_at = new Date().toISOString();
-    payload.updated_at = new Date().toISOString();
+    if (tablesWithUpdatedAt.has(table)) {
+      payload.updated_at = new Date().toISOString();
+    } else {
+      delete payload.updated_at;
+    }
     return payload;
   }
 

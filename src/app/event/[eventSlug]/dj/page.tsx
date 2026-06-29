@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, ExternalLink, HeartHandshake, Mail, MessageCircle } from "lucide-react";
 import { AppShell } from "@/components/event/app-shell";
+import { GalleryMediaCard } from "@/components/event/gallery-media-card";
 import { MusicPreviewCard } from "@/components/event/music-preview-card";
 import { DarkCard } from "@/components/ui/dark-card";
 import { getEventBundle } from "@/lib/data";
@@ -72,12 +73,7 @@ export default async function DJPage({ params, searchParams }: { params: { event
         <DarkCard>
           <h3 className="text-lg font-semibold text-white">Gallery</h3>
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {bundle.gallery.map((item) => (
-              <figure key={item.id} className="overflow-hidden rounded-[20px] border border-line bg-night">
-                <img src={item.media_url} alt={item.caption || "DJ gallery"} className="h-36 w-full object-cover" />
-                {item.caption ? <figcaption className="p-2 text-xs text-muted">{item.caption}</figcaption> : null}
-              </figure>
-            ))}
+            {bundle.gallery.map((item) => <GalleryMediaCard key={item.id} item={item} />)}
           </div>
         </DarkCard>
 

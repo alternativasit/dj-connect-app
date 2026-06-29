@@ -36,7 +36,14 @@ export default async function AdminGalleryPage() {
       emptyLabel: "No event selected",
       description: "Optional. Choose an event if this media belongs to a specific party."
     },
-    { name: "media_url", label: "Media URL", type: "image", required: true, description: "Paste the image or video URL that should appear in the gallery.", placeholder: "https://..." },
+    {
+      name: "media_url",
+      label: "Media URL",
+      type: "image",
+      required: true,
+      description: "Paste a direct image URL ending in .jpg, .png, .webp, or a public video URL. Avoid stock photo page links because those cannot render as images.",
+      placeholder: "https://images.unsplash.com/photo-..."
+    },
     { name: "media_type", label: "Media type", type: "select", options: ["image", "video"], description: "Choose image for photos or video for video links." },
     { name: "caption", label: "Caption", description: "Short text shown below the media.", placeholder: "Rooftop crowd, main stage, aftermovie..." },
     { name: "display_order", label: "Display order", type: "number", description: "Lower numbers appear first." }
